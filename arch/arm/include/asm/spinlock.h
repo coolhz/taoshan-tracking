@@ -178,7 +178,7 @@ static inline void arch_spin_unlock(arch_spinlock_t *lock)
 static inline void arch_spin_lock(arch_spinlock_t *lock)
 {
 	unsigned long tmp, ticket, next_ticket;
-	unsigned long fixup = msm_krait_need_wfe_fixup;
+	unsigned long fixup = (unsigned long) msm_krait_need_wfe_fixup;
 
 	/* Grab the next ticket and wait for it to be "served" */
 	__asm__ __volatile__(
@@ -247,7 +247,7 @@ static inline void arch_spin_unlock(arch_spinlock_t *lock)
 
 static inline void arch_spin_unlock_wait(arch_spinlock_t *lock)
 {
-	unsigned long ticket, tmp, fixup = msm_krait_need_wfe_fixup;
+	unsigned long ticket, tmp, fixup = (unsigned long) msm_krait_need_wfe_fixup;
 
 	/* Wait for now_serving == next_ticket */
 	__asm__ __volatile__(
@@ -294,7 +294,7 @@ static inline int arch_spin_is_contended(arch_spinlock_t *lock)
 
 static inline void arch_write_lock(arch_rwlock_t *rw)
 {
-	unsigned long tmp, fixup = msm_krait_need_wfe_fixup;
+	unsigned long tmp, fixup = (unsigned long) msm_krait_need_wfe_fixup;
 
 	__asm__ __volatile__(
 "1:	ldrex	%[tmp], [%[lock]]\n"
@@ -362,7 +362,7 @@ static inline void arch_write_unlock(arch_rwlock_t *rw)
  */
 static inline void arch_read_lock(arch_rwlock_t *rw)
 {
-	unsigned long tmp, tmp2, fixup = msm_krait_need_wfe_fixup;
+	unsigned long tmp, tmp2, fixup = (unsigned long) msm_krait_need_wfe_fixup;
 
 	__asm__ __volatile__(
 "1:	ldrex	%[tmp], [%[lock]]\n"

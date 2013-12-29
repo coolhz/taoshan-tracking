@@ -272,7 +272,7 @@ extern int		nla_append(struct sk_buff *skb, int attrlen,
  * nlmsg_msg_size - length of netlink message not including padding
  * @payload: length of message payload
  */
-static inline int nlmsg_msg_size(int payload)
+static inline unsigned int nlmsg_msg_size(int payload)
 {
 	return NLMSG_HDRLEN + payload;
 }
@@ -281,7 +281,7 @@ static inline int nlmsg_msg_size(int payload)
  * nlmsg_total_size - length of netlink message including padding
  * @payload: length of message payload
  */
-static inline int nlmsg_total_size(int payload)
+static inline unsigned int nlmsg_total_size(int payload)
 {
 	return NLMSG_ALIGN(nlmsg_msg_size(payload));
 }
@@ -290,7 +290,7 @@ static inline int nlmsg_total_size(int payload)
  * nlmsg_padlen - length of padding at the message's tail
  * @payload: length of message payload
  */
-static inline int nlmsg_padlen(int payload)
+static inline unsigned int nlmsg_padlen(int payload)
 {
 	return nlmsg_total_size(payload) - nlmsg_msg_size(payload);
 }
@@ -308,7 +308,7 @@ static inline void *nlmsg_data(const struct nlmsghdr *nlh)
  * nlmsg_len - length of message payload
  * @nlh: netlink message header
  */
-static inline int nlmsg_len(const struct nlmsghdr *nlh)
+static inline unsigned int nlmsg_len(const struct nlmsghdr *nlh)
 {
 	return nlh->nlmsg_len - NLMSG_HDRLEN;
 }
@@ -330,7 +330,7 @@ static inline struct nlattr *nlmsg_attrdata(const struct nlmsghdr *nlh,
  * @nlh: netlink message header
  * @hdrlen: length of family specific header
  */
-static inline int nlmsg_attrlen(const struct nlmsghdr *nlh, int hdrlen)
+static inline unsigned int nlmsg_attrlen(const struct nlmsghdr *nlh, int hdrlen)
 {
 	return nlmsg_len(nlh) - NLMSG_ALIGN(hdrlen);
 }
@@ -344,7 +344,7 @@ static inline int nlmsg_ok(const struct nlmsghdr *nlh, int remaining)
 {
 	return (remaining >= (int) sizeof(struct nlmsghdr) &&
 		nlh->nlmsg_len >= sizeof(struct nlmsghdr) &&
-		nlh->nlmsg_len <= remaining);
+		(int) nlh->nlmsg_len <= remaining);
 }
 
 /**
@@ -456,7 +456,7 @@ static inline int nlmsg_report(const struct nlmsghdr *nlh)
 static inline struct nlmsghdr *nlmsg_put(struct sk_buff *skb, u32 pid, u32 seq,
 					 int type, int payload, int flags)
 {
-	if (unlikely(skb_tailroom(skb) < nlmsg_total_size(payload)))
+	if (unlikely((unsigned) skb_tailroom(skb) < nlmsg_total_size(payload)))
 		return NULL;
 
 	return __nlmsg_put(skb, pid, seq, type, payload, flags);

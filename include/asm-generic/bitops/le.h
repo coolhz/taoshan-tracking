@@ -11,19 +11,19 @@
 static inline unsigned long find_next_zero_bit_le(const void *addr,
 		unsigned long size, unsigned long offset)
 {
-	return find_next_zero_bit(addr, size, offset);
+	return (unsigned long) find_next_zero_bit(addr, (long) size, (long) offset);
 }
 
 static inline unsigned long find_next_bit_le(const void *addr,
 		unsigned long size, unsigned long offset)
 {
-	return find_next_bit(addr, size, offset);
+	return (unsigned long) find_next_bit(addr, (long) size, (long) offset);
 }
 
 static inline unsigned long find_first_zero_bit_le(const void *addr,
 		unsigned long size)
 {
-	return find_first_zero_bit(addr, size);
+	return (unsigned long) find_first_zero_bit(addr, size);
 }
 
 #elif defined(__BIG_ENDIAN)

@@ -157,7 +157,7 @@ static inline void le64_add_cpu(__le64 *var, u64 val)
 
 static inline void be16_add_cpu(__be16 *var, u16 val)
 {
-	*var = cpu_to_be16(be16_to_cpu(*var) + val);
+	*var = cpu_to_be16((__u16)((u16) be16_to_cpu(*var) + val));
 }
 
 static inline void be32_add_cpu(__be32 *var, u32 val)

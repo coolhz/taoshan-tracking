@@ -66,8 +66,8 @@ static inline __attribute_const__ __u64 __fswab64(__u64 val)
 #ifdef __arch_swab64
 	return __arch_swab64(val);
 #elif defined(__SWAB_64_THRU_32__)
-	__u32 h = val >> 32;
-	__u32 l = val & ((1ULL << 32) - 1);
+	__u32 h = (__u32)(val >> 32);
+	__u32 l = (__u32)(val & ((1ULL << 32) - 1));
 	return (((__u64)__fswab32(l)) << 32) | ((__u64)(__fswab32(h)));
 #else
 	return ___constant_swab64(val);
@@ -150,7 +150,7 @@ static inline __u16 __swab16p(const __u16 *p)
 #ifdef __arch_swab16p
 	return __arch_swab16p(p);
 #else
-	return __swab16(*p);
+	return (__u16) __swab16(*p);
 #endif
 }
 

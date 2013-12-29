@@ -6,6 +6,9 @@
  * ELF section at every dynamic debug callsite.  At runtime,
  * the special section is treated as an array of these.
  */
+/* FIXME: Padding creates gcc error */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpadded"
 struct _ddebug {
 	/*
 	 * These fields are used to drive the user interface
@@ -34,7 +37,7 @@ struct _ddebug {
 #endif
 	unsigned int flags:8;
 } __attribute__((aligned(8)));
-
+#pragma GCC diagnostic pop
 
 int ddebug_add_module(struct _ddebug *tab, unsigned int n,
 				const char *modname);

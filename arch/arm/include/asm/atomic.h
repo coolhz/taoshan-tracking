@@ -131,7 +131,7 @@ static inline int atomic_cmpxchg(atomic_t *ptr, int old, int new)
 
 	smp_mb();
 
-	return oldval;
+	return (int) oldval;
 }
 
 static inline void atomic_clear_mask(unsigned long mask, unsigned long *addr)

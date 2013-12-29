@@ -104,10 +104,12 @@
 struct pt_regs {
 	long uregs[18];
 };
+#define UREGS_TYPE long
 #else /* __KERNEL__ */
 struct pt_regs {
 	unsigned long uregs[18];
 };
+#define UREGS_TYPE unsigned long
 #endif /* __KERNEL__ */
 
 #define ARM_cpsr	uregs[16]
@@ -170,7 +172,7 @@ static inline int valid_user_regs(struct pt_regs *regs)
 	/*
 	 * Always clear the F (FIQ) and A (delayed abort) bits
 	 */
-	regs->ARM_cpsr &= ~(PSR_F_BIT | PSR_A_BIT);
+	regs->ARM_cpsr &= (UREGS_TYPE) ~(PSR_F_BIT | PSR_A_BIT);
 
 	if ((regs->ARM_cpsr & PSR_I_BIT) == 0) {
 		if (mode == USR_MODE)
@@ -191,7 +193,7 @@ static inline int valid_user_regs(struct pt_regs *regs)
 
 static inline long regs_return_value(struct pt_regs *regs)
 {
-	return regs->ARM_r0;
+	return (long) regs->ARM_r0;
 }
 
 #define instruction_pointer(regs)	(regs)->ARM_pc

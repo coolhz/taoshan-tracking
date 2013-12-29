@@ -31,7 +31,7 @@ int ____ilog2_NaN(void);
 static inline __attribute__((const))
 int __ilog2_u32(u32 n)
 {
-	return fls(n) - 1;
+	return fls((int) n) - 1;
 }
 #endif
 

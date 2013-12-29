@@ -2324,7 +2324,7 @@ enum {
 static inline u32 netif_msg_init(int debug_value, int default_msg_enable_bits)
 {
 	/* use default */
-	if (debug_value < 0 || debug_value >= (sizeof(u32) * 8))
+	if (debug_value < 0 || debug_value >= (int) (sizeof(u32) * 8))
 		return default_msg_enable_bits;
 	if (debug_value == 0)	/* no output */
 		return 0;

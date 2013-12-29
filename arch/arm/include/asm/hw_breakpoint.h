@@ -26,8 +26,9 @@ struct arch_hw_breakpoint {
 
 static inline u32 encode_ctrl_reg(struct arch_hw_breakpoint_ctrl ctrl)
 {
-	return (ctrl.mismatch << 22) | (ctrl.len << 5) | (ctrl.type << 3) |
-		(ctrl.privilege << 1) | ctrl.enabled;
+	return 
+	((u32)(ctrl.mismatch << 22)) | ((u32)(ctrl.len << 5))  | ((u32)(ctrl.type << 3)) |
+		((u32)(ctrl.privilege << 1)) | (u32) ctrl.enabled;
 }
 
 static inline void decode_ctrl_reg(u32 reg,

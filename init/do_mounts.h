@@ -8,7 +8,7 @@
 #include <linux/major.h>
 #include <linux/root_dev.h>
 
-void  change_floppy(char *fmt, ...);
+void  change_floppy(char *fmt, ...) __attribute__((format(printf,1,2)));
 void  mount_block_root(char *name, int flags);
 void  mount_root(void);
 extern int root_mountflags;

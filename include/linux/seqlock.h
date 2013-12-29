@@ -183,7 +183,7 @@ static inline unsigned raw_seqcount_begin(const seqcount_t *s)
 {
 	unsigned ret = ACCESS_ONCE(s->sequence);
 	smp_rmb();
-	return ret & ~1;
+	return (unsigned) ret & (unsigned) ~1;
 }
 
 /**

@@ -387,8 +387,8 @@ static int __init write_buffer(char *buf, unsigned len)
 static int __init flush_buffer(void *bufv, unsigned len)
 {
 	char *buf = (char *) bufv;
-	int written;
-	int origLen = len;
+	unsigned written;
+	unsigned origLen = len;
 	if (message)
 		return -1;
 	while ((written = write_buffer(buf, len)) < len && !message) {

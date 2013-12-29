@@ -23,21 +23,21 @@ static inline unsigned long __cmpxchg_local_generic(volatile void *ptr,
 
 	local_irq_save(flags);
 	switch (size) {
-	case 1: prev = *(u8 *)ptr;
+	case 1: prev = *(volatile u8 *)ptr;
 		if (prev == old)
-			*(u8 *)ptr = (u8)new;
+			*(volatile u8 *)ptr = (u8)new;
 		break;
-	case 2: prev = *(u16 *)ptr;
+	case 2: prev = *(volatile u16 *)ptr;
 		if (prev == old)
-			*(u16 *)ptr = (u16)new;
+			*(volatile u16 *)ptr = (u16)new;
 		break;
-	case 4: prev = *(u32 *)ptr;
+	case 4: prev = *(volatile u32 *)ptr;
 		if (prev == old)
-			*(u32 *)ptr = (u32)new;
+			*(volatile u32 *)ptr = (u32)new;
 		break;
-	case 8: prev = *(u64 *)ptr;
+	case 8: prev = (unsigned long) *(volatile u64 *)ptr;
 		if (prev == old)
-			*(u64 *)ptr = (u64)new;
+			*(volatile u64 *)ptr = (u64)new;
 		break;
 	default:
 		wrong_size_cmpxchg(ptr);
@@ -56,9 +56,9 @@ static inline u64 __cmpxchg64_local_generic(volatile void *ptr,
 	unsigned long flags;
 
 	local_irq_save(flags);
-	prev = *(u64 *)ptr;
+	prev = *(volatile u64 *)ptr;
 	if (prev == old)
-		*(u64 *)ptr = new;
+		*(volatile u64 *)ptr = new;
 	local_irq_restore(flags);
 	return prev;
 }

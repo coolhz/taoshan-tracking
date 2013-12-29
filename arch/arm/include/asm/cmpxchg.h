@@ -23,9 +23,9 @@
 #define swp_is_buggy
 #endif
 
+extern void __bad_xchg(volatile void *, int);
 static inline unsigned long __xchg(unsigned long x, volatile void *ptr, int size)
 {
-	extern void __bad_xchg(volatile void *, int);
 	unsigned long ret;
 #ifdef swp_is_buggy
 	unsigned long flags;

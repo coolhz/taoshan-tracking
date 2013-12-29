@@ -1881,7 +1881,7 @@ static inline int __skb_cow(struct sk_buff *skb, unsigned int headroom,
 {
 	int delta = 0;
 
-	if (headroom < NET_SKB_PAD)
+	if (headroom < (unsigned) NET_SKB_PAD)
 		headroom = NET_SKB_PAD;
 	if (headroom > skb_headroom(skb))
 		delta = headroom - skb_headroom(skb);
@@ -1970,7 +1970,7 @@ static inline int skb_can_coalesce(struct sk_buff *skb, int i,
 		const struct skb_frag_struct *frag = &skb_shinfo(skb)->frags[i - 1];
 
 		return page == skb_frag_page(frag) &&
-		       off == frag->page_offset + skb_frag_size(frag);
+		       (unsigned) off == frag->page_offset + skb_frag_size(frag);
 	}
 	return 0;
 }

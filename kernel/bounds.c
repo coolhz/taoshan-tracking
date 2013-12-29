@@ -11,6 +11,8 @@
 #include <linux/kbuild.h>
 #include <linux/page_cgroup.h>
 
+void foo(void);
+
 void foo(void)
 {
 	/* The enum constants to put into include/generated/bounds.h */

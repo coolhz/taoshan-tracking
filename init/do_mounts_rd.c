@@ -215,7 +215,7 @@ int __init rd_load_image(char *from)
 	else
 		rd_blocks >>= 1;
 
-	if (nblocks > rd_blocks) {
+	if ((unsigned)nblocks > rd_blocks) {
 		printk("RAMDISK: image too big! (%dKiB/%ldKiB)\n",
 		       nblocks, rd_blocks);
 		goto done;
@@ -244,7 +244,7 @@ int __init rd_load_image(char *from)
 	}
 
 	printk(KERN_NOTICE "RAMDISK: Loading %dKiB [%ld disk%s] into ram disk... ",
-		nblocks, ((nblocks-1)/devblocks)+1, nblocks>devblocks ? "s" : "");
+		nblocks, ((nblocks-1)/devblocks)+1, (unsigned)nblocks>devblocks ? "s" : "");
 	for (i = 0, disk = 1; i < nblocks; i++) {
 		if (i && (i % devblocks == 0)) {
 			printk("done disk #%d.\n", disk++);
@@ -309,7 +309,7 @@ static int __init compr_fill(void *buf, unsigned int len)
 
 static int __init compr_flush(void *window, unsigned int outcnt)
 {
-	int written = sys_write(crd_outfd, window, outcnt);
+	unsigned int written = sys_write(crd_outfd, window, outcnt);
 	if (written != outcnt) {
 		if (decompress_error == 0)
 			printk(KERN_ERR

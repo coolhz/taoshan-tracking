@@ -230,23 +230,23 @@ static inline int constant_fls(int x)
 
 	if (!x)
 		return 0;
-	if (!(x & 0xffff0000u)) {
+	if (!((unsigned int)x & 0xffff0000u)) {
 		x <<= 16;
 		r -= 16;
 	}
-	if (!(x & 0xff000000u)) {
+	if (!((unsigned int)x & 0xff000000u)) {
 		x <<= 8;
 		r -= 8;
 	}
-	if (!(x & 0xf0000000u)) {
+	if (!((unsigned int)x & 0xf0000000u)) {
 		x <<= 4;
 		r -= 4;
 	}
-	if (!(x & 0xc0000000u)) {
+	if (!((unsigned int)x & 0xc0000000u)) {
 		x <<= 2;
 		r -= 2;
 	}
-	if (!(x & 0x80000000u)) {
+	if (!((unsigned int)x & 0x80000000u)) {
 		x <<= 1;
 		r -= 1;
 	}
@@ -271,7 +271,7 @@ static inline int fls(int x)
 }
 
 #define __fls(x) (fls(x) - 1)
-#define ffs(x) ({ unsigned long __t = (x); fls(__t & -__t); })
+#define ffs(x) ({ int __t = (x); fls(__t & -__t); })
 #define __ffs(x) (ffs(x) - 1)
 #define ffz(x) __ffs( ~(x) )
 
