@@ -1444,15 +1444,15 @@ static int process_control_msg(struct msm_ipc_router_xprt_info *xprt_info,
 		mutex_unlock(&routing_table_lock);
 
 		mutex_lock(&server_list_lock);
-		server = msm_ipc_router_lookup_server(msg->srv.service,
-						      msg->srv.instance,
-						      msg->srv.node_id,
-						      msg->srv.port_id);
-		if (!server) {
-			server = msm_ipc_router_create_server(
+	server = msm_ipc_router_lookup_server(msg->srv.service,
+						  msg->srv.instance,
+					      msg->srv.node_id,
+					      msg->srv.port_id);
+	if (!server) {
+		server = msm_ipc_router_create_server(
 				msg->srv.service, msg->srv.instance,
 				msg->srv.node_id, msg->srv.port_id, xprt_info);
-			if (!server) {
+		if (!server) {
 				mutex_unlock(&server_list_lock);
 				pr_err("%s: Server Create failed\n", __func__);
 				return -ENOMEM;

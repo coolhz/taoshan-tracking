@@ -1,5 +1,5 @@
 /* Copyright (c) 2010-2013, The Linux Foundation. All rights reserved.
- * Copyright (C) 2012 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -35,6 +35,7 @@
 #include "msm_watchdog.h"
 #include "timer.h"
 #include <linux/ccistuff.h>
+
 #define MODULE_NAME "msm_watchdog"
 
 #define TCSR_WDT_CFG	0x30

@@ -62,7 +62,6 @@
 #if(CONFIG_PM8038_CHG_DEBUG)
     #define PrintLog_DEBUG(fmt, args...)    printk(KERN_INFO "CH(L)=> "pr_fmt(fmt), ##args)
     #define PrintLog_PRDEBUG(fmt, args...)    printk(KERN_INFO "CH(L)=> "pr_fmt(fmt), ##args)
-//    #define PrintLog_DEBUG(fmt, args...)    pr_debug("CH(L)=> "pr_fmt(fmt), ##args)
 #else
     #define PrintLog_DEBUG(fmt, args...)
 #endif
@@ -259,10 +258,8 @@ static char FuelGauge_drv_FW_version[] = "0002";
 
 char * get_FuelGauge_drv_version(void)
 {
-//	return &FuelGauge_drv_FW_version[0];
 	return FuelGauge_drv_FW_version;
 }
-// EXPORT_SYMBOL_GPL(get_FuelGauge_drv_version);
 #endif
 
 static int pm8921_battery_gauge_alarm_notify(struct notifier_block *nb,
@@ -3224,7 +3221,7 @@ palladium:
 		chip->fcc_temp_lut = palladium_1500_data.fcc_temp_lut;
 		chip->fcc_sf_lut = palladium_1500_data.fcc_sf_lut;
 		chip->pc_temp_ocv_lut = palladium_1500_data.pc_temp_ocv_lut;
-		#ifdef ORG_VER//LO
+		#ifdef ORG_VER
 		chip->pc_sf_lut = palladium_1500_data.pc_sf_lut;
                 #else
 		chip->pc_sf_lut = NULL;
@@ -3232,7 +3229,7 @@ palladium:
 		chip->rbatt_sf_lut = palladium_1500_data.rbatt_sf_lut;
 		chip->default_rbatt_mohm
 				= palladium_1500_data.default_rbatt_mohm;
-		#ifdef ORG_VER//LO
+		#ifdef ORG_VER
 		chip->delta_rbatt_mohm = palladium_1500_data.delta_rbatt_mohm;
                 #else
 		chip->delta_rbatt_mohm = 0;

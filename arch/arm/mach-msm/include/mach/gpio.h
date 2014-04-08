@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2007 Google, Inc.
  * Copyright (c) 2009-2012, The Linux Foundation. All rights reserved.
- * Copyright (C) 2012 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  * Author: Mike Lockwood <lockwood@android.com>
  *
  * This software is licensed under the terms of the GNU General Public
@@ -229,7 +229,6 @@ int __init msm_gpio_of_init(struct device_node *node,
 			    struct device_node *parent);
 #endif
 
-// Luke -->
 #define EU_BAND_HW_ID  1
 #define US_BAND_HW_ID  2
 
@@ -254,6 +253,5 @@ int nfc_with_hw_id(void);
 int band_type_with_hw_id(void);
 int board_type_with_hw_id(void);
 int model_name_with_hw_id(void);
-// Luke <--
 
 #endif /* __ASM_ARCH_MSM_GPIO_H */

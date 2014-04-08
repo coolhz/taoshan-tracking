@@ -4,7 +4,7 @@
  * Copyright (C) 2003-2008 Alan Stern
  * Copyright (C) 2009 Samsung Electronics
  *                    Author: Michal Nazarewicz <mina86@mina86.com>
- * Copyright (C) 2012 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -267,7 +267,7 @@
  * Warning: This driver source file is too long.  It ought to be split up
  * into a header file plus about 3 separate .c files, to handle the details
  * of the Gadget, USB Mass Storage, and SCSI protocols.
-  * NOTE: This file has been modified by Sony Ericsson Mobile Communications AB /
+ * NOTE: This file has been modified by Sony Ericsson Mobile Communications AB /
  * Sony Mobile Communications AB. Modifications are licensed under the License.
  */
 
@@ -368,13 +368,11 @@ struct fsg_operations {
 	int (*post_eject)(struct fsg_common *common,
 			  struct fsg_lun *lun, int num);
 };
-//S WHCK-MSC
 /* EUI-64 identifier format for Device Identification VPD page */
 struct eui64_id {
 	u8 ieee_company_id[3];
 	u8 vendor_specific_ext_field[5];
 } __packed;
-//E WHCK-MSC
 /* Data shared by all the FSG instances. */
 struct fsg_common {
 	struct usb_gadget	*gadget;
@@ -447,11 +445,9 @@ struct fsg_common {
 #else
 	char inquiry_string[8 + 16 + 4 + 1];
 #endif
-//S WHCK-MSC
 	/* inquiry */
-	char			serial_number[USB_SERIAL_NUMBER_MAX_LEN + 1];
+	char	serial_number[USB_SERIAL_NUMBER_MAX_LEN + 1];
 	struct eui64_id		eui64_id;
-//E WHCK-MSC
 	struct kref		ref;
 };
 
@@ -1311,11 +1307,9 @@ static int do_inquiry(struct fsg_common *common, struct fsg_buffhd *bh)
 {
 	struct fsg_lun *curlun = common->curlun;
 	u8	*buf = (u8 *) bh->buf;
-//S WHCK-MSC
 	u8	evpd;
 	u8	page_code;
 	u16	len;
-//E WHCK-MSC
 	if (!curlun) {		/* Unsupported LUNs are okay */
 		common->bad_lun_okay = 1;
 		memset(buf, 0, 36);
@@ -1324,7 +1318,6 @@ static int do_inquiry(struct fsg_common *common, struct fsg_buffhd *bh)
 		return 36;
 	}
 
-//S WHCK-MSC
 	evpd = common->cmnd[1] & 0x1;
 	page_code = common->cmnd[2];
 	if (evpd == 0 && page_code) {
@@ -1398,10 +1391,9 @@ static int do_inquiry(struct fsg_common *common, struct fsg_buffhd *bh)
 			return len;
 		}
 	}
-//E WHCK-MSC
 	buf[0] = curlun->cdrom ? TYPE_ROM : TYPE_DISK;
 	buf[1] = curlun->removable ? 0x80 : 0;
-	buf[2] = 4; //2; WHCK-MSC	/* ANSI SCSI level 2 */
+	buf[2] = 4; 	/* ANSI SCSI level 2 */
 	buf[3] = 2;		/* SCSI-2 INQUIRY data format */
 	buf[4] = 31;		/* Additional length */
 	buf[5] = 0;		/* No special options */
@@ -1495,7 +1487,6 @@ static int do_read_capacity(struct fsg_common *common, struct fsg_buffhd *bh)
 	return 8;
 }
 
-//S WHCK-MSC
 static int do_read_capacity16(struct fsg_common *common, struct fsg_buffhd *bh)
 {
 	struct fsg_lun	*curlun = common->curlun;
@@ -1517,7 +1508,6 @@ static int do_read_capacity16(struct fsg_common *common, struct fsg_buffhd *bh)
 
 	return 32;
 }
-//E WHCK-MSC
 
 static int do_read_header(struct fsg_common *common, struct fsg_buffhd *bh)
 {
@@ -1576,7 +1566,6 @@ static int do_mode_sense(struct fsg_common *common, struct fsg_buffhd *bh)
 	u8		*buf0 = buf;
 	int		pc, page_code;
 	int		changeable_values, all_pages;
-	//int		valid_page = 0; //WHCK-MSC remove
 	int		len, limit;
 
 	if ((common->cmnd[1] & ~0x08) != 0) {	/* Mask away DBD */
@@ -1616,7 +1605,6 @@ static int do_mode_sense(struct fsg_common *common, struct fsg_buffhd *bh)
 	 * is the Caching page.
 	 */
 	if (page_code == 0x08 || all_pages) {
-		//valid_page = 1; //WHCK-MSC remove
 		buf[0] = 0x08;		/* Page code */
 		buf[1] = 10;		/* Page length */
 		memset(buf+2, 0, 10);	/* None of the fields are changeable */
@@ -1641,8 +1629,7 @@ static int do_mode_sense(struct fsg_common *common, struct fsg_buffhd *bh)
 	 * isn't too long.
 	 */
 	len = buf - buf0;
-	//if (!valid_page || len > limit) {
-	if ( len > limit) { //WHCK-MSC
+	if ( len > limit) {
 		curlun->sense_data = SS_INVALID_FIELD_IN_CDB;
 		return -EINVAL;
 	}
@@ -1652,12 +1639,10 @@ static int do_mode_sense(struct fsg_common *common, struct fsg_buffhd *bh)
 		buf0[0] = len - 1;
 	else
 		put_unaligned_be16(len - 2, buf0);
-//S WHCK-MSC
 	if (len < common->data_size_from_cmnd) {
 		common->data_size_from_cmnd = len;
 		common->residue = len;
 	}
-//E WHCK-MSC
 	return len;
 }
 
@@ -1665,7 +1650,7 @@ static int do_start_stop(struct fsg_common *common)
 {
 	struct fsg_lun	*curlun = common->curlun;
 	int		loej, start;
-	int		rc; //WHCK-MSC
+	int		rc;
 
 	if (!curlun) {
 		return -EINVAL;
@@ -1681,9 +1666,11 @@ static int do_start_stop(struct fsg_common *common)
 	loej  = common->cmnd[4] & 0x02;
 	start = common->cmnd[4] & 0x01;
 
+	/*
+	 * Our emulation doesn't support mounting; the medium is
+	 * available for use as soon as it is loaded.
+	 */
 	if (start) {
-//S WHCK-MSC
-	//	if (!fsg_lun_is_open(curlun)) {
 		if (loej && !fsg_lun_is_open(curlun)) {
 			if (curlun->lun_filename) {
 				up_read(&common->filesem);
@@ -1700,10 +1687,9 @@ static int do_start_stop(struct fsg_common *common)
 					return -EINVAL;
 				}
 			} else {
-//E WHCK-MSC
 				curlun->sense_data = SS_MEDIUM_NOT_PRESENT;
 				return -EINVAL;
-			} //WHCK-MSC
+			}
 			return 0;
 		}
 	}
@@ -1719,7 +1705,7 @@ static int do_start_stop(struct fsg_common *common)
 		return 0;
 
 	/* Simulate an unload/eject */
-	if (fsg_lun_is_open(curlun)) { //WHCK-MSC
+	if (fsg_lun_is_open(curlun)) {
 	if (common->ops && common->ops->pre_eject) {
 		int r = common->ops->pre_eject(common, curlun,
 					       curlun - common->luns);
@@ -1734,7 +1720,7 @@ static int do_start_stop(struct fsg_common *common)
 	fsg_lun_close(curlun);
 	up_write(&common->filesem);
 	down_read(&common->filesem);
-	} //WHCK-MSC
+	}
 
 	return common->ops && common->ops->post_eject
 		? min(0, common->ops->post_eject(common, curlun,
@@ -2102,7 +2088,6 @@ static int check_command(struct fsg_common *common, int cmnd_size,
 		 * we are allowed.
 		 */
 		common->data_size_from_cmnd = common->data_size;
-		//common->phase_error = 1; //WHCK-MSC remove
 	}
 	common->residue = common->data_size;
 	common->usb_amount_left = common->data_size;
@@ -2237,8 +2222,7 @@ static int do_scsi_command(struct fsg_common *common)
 	case INQUIRY:
 		common->data_size_from_cmnd = common->cmnd[4];
 		reply = check_command(common, 6, DATA_DIR_TO_HOST,
-				      (1<<1) | (1<<2) | (3<<3), 0,  //WHCK-MSC
-//				      (1<<4), 0,
+				      (1<<1) | (1<<2) | (3<<3), 0,
 				      "INQUIRY");
 		if (reply == 0)
 			reply = do_inquiry(common, bh);
@@ -2332,7 +2316,6 @@ static int do_scsi_command(struct fsg_common *common)
 		if (reply == 0)
 			reply = do_read_capacity(common, bh);
 		break;
-//S WHCK-MSC
 	case READ_CAPACITY_16:
 		common->data_size_from_cmnd = 32;
 		reply = check_command(common, 16, DATA_DIR_TO_HOST,
@@ -2341,7 +2324,6 @@ static int do_scsi_command(struct fsg_common *common)
 		if (reply == 0)
 			reply = do_read_capacity16(common, bh);
 		break;
-//E WHCK-MSC
 	case READ_HEADER:
 		if (!common->curlun || !common->curlun->cdrom)
 			goto unknown_cmnd;
@@ -3208,7 +3190,7 @@ buffhds_first_it:
 				     : "File-CD Gadget"),
 		 i);
 #endif
-	strlcpy(common->serial_number, " ", sizeof(common->serial_number)); //WHCK-MSC
+	strlcpy(common->serial_number, " ", sizeof(common->serial_number));
 	/*
 	 * Some peripheral controllers are known not to be able to
 	 * halt bulk endpoints correctly.  If one of them is present,
@@ -3303,10 +3285,8 @@ static void fsg_common_release(struct kref *ref)
 			device_remove_file(&lun->dev, &dev_attr_ro);
 			device_remove_file(&lun->dev, &dev_attr_file);
 			fsg_lun_close(lun);
-//S WHCK-MSC
 			kfree(lun->lun_filename);
 			lun->lun_filename = NULL;
-//E WHCK-MSC
 			device_unregister(&lun->dev);
 		}
 #ifdef F_CDROM

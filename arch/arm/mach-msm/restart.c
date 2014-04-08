@@ -1,5 +1,5 @@
 /* Copyright (c) 2010-2012, The Linux Foundation. All rights reserved.
- * Copyright (C) 2012 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -60,7 +60,7 @@ static long abnormalflag = ABNORAML_NONE;
 
 #ifdef CONFIG_CCI_KLOG
 #include <linux/cciklog.h>
-#endif // #ifdef CONFIG_CCI_KLOG
+#endif
 
 
 #define PSHOLD_CTL_SU (MSM_TLMM_BASE + 0x820)
@@ -109,7 +109,7 @@ module_param_call(download_mode, dload_set, param_get_int,
 
 #ifdef CONFIG_CCI_KLOG
 extern void record_shutdown_time(int state);
-#endif // #ifdef CONFIG_CCI_KLOG
+#endif
 
 
 static int panic_prep_restart(struct notifier_block *this,
@@ -205,7 +205,7 @@ static void __msm_power_off(int lower_pshold)
 #ifdef CONFIG_CCI_KLOG
 	cklc_save_magic(KLOG_MAGIC_POWER_OFF, KLOG_STATE_NONE);
 	record_shutdown_time(0x06);
-#endif // #ifdef CONFIG_CCI_KLOG
+#endif
 
 	printk(KERN_CRIT "Powering off the SoC\n");
 #ifdef CONFIG_MSM_DLOAD_MODE
@@ -241,6 +241,7 @@ static void cpu_power_off(void *data)
 	*unknowflag = 0;
 	*backupcrashflag = 0;
 #endif
+
 	pr_err("PMIC Initiated shutdown %s cpu=%d\n", __func__,
 						smp_processor_id());
 	if (smp_processor_id() == 0) {
@@ -320,7 +321,7 @@ void msm_restart(char mode, const char *cmd)
 
 #ifdef CONFIG_CCI_KLOG
 	char buf[7] = {0};
-#endif // #ifdef CONFIG_CCI_KLOG
+#endif
 
 	__raw_writel(CONFIG_WARMBOOT_NONE, restart_reason);
 #ifdef CONFIG_CCI_KLOG	
@@ -362,7 +363,7 @@ void msm_restart(char mode, const char *cmd)
 
 #ifdef CONFIG_CCI_KLOG
 		cklc_save_magic(KLOG_MAGIC_DOWNLOAD_MODE, KLOG_STATE_DOWNLOAD_MODE);
-#endif // #ifdef CONFIG_CCI_KLOG
+#endif
 
 		if(system_flag == inactive)	
 			system_flag = adloadmode;
@@ -407,7 +408,7 @@ void msm_restart(char mode, const char *cmd)
 
 #ifdef CONFIG_CCI_KLOG
 			cklc_save_magic(KLOG_MAGIC_BOOTLOADER, KLOG_STATE_NONE);
-#endif // #ifdef CONFIG_CCI_KLOG
+#endif
 
 #if 0
 			__raw_writel(0x77665500, restart_reason);
@@ -421,7 +422,7 @@ void msm_restart(char mode, const char *cmd)
 
 #ifdef CONFIG_CCI_KLOG
 			cklc_save_magic(KLOG_MAGIC_RECOVERY, KLOG_STATE_NONE);
-#endif // #ifdef CONFIG_CCI_KLOG
+#endif
 
 #if 0
 			__raw_writel(0x77665502, restart_reason);
@@ -501,12 +502,12 @@ void msm_restart(char mode, const char *cmd)
 					cklc_save_magic(buf, KLOG_STATE_NONE);
 					break;
 			}
-#else // #ifdef CCI_KLOG_ALLOW_FORCE_PANIC
+#else
 			cklc_save_magic(buf, KLOG_STATE_NONE);
-#endif // #ifdef CCI_KLOG_ALLOW_FORCE_PANIC
+#endif
             if(system_flag == inactive)
 	            system_flag = normalreboot_oem;	
-#endif // #ifdef CONFIG_CCI_KLOG
+#endif
 
 		} 
 		else if (!strncmp(cmd, "oemS", 4)) 
@@ -528,7 +529,7 @@ void msm_restart(char mode, const char *cmd)
 
 #ifdef CONFIG_CCI_KLOG
 			cklc_save_magic(KLOG_MAGIC_REBOOT, KLOG_STATE_NONE);
-#endif // #ifdef CONFIG_CCI_KLOG
+#endif
 
 #if 0
 			__raw_writel(0x77665501, restart_reason);
@@ -540,13 +541,11 @@ void msm_restart(char mode, const char *cmd)
 				system_flag = normalreboot;	
 #endif
 		}
-	} 		
-	else 
-	{
+	} else {
 
 #ifdef CONFIG_CCI_KLOG
 		cklc_save_magic(KLOG_MAGIC_REBOOT, KLOG_STATE_NONE);
-#endif // #ifdef CONFIG_CCI_KLOG
+#endif
 
 #if 0
 		__raw_writel(0x77665501, restart_reason);

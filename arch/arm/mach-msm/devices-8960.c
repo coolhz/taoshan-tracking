@@ -1954,9 +1954,6 @@ struct platform_device msm8960_device_qup_i2c_gsbi12 = {
 
 
 #if 1
-//
-// , 20120708, [ ] Porting sensor. GSBI_1 config
-//
 static struct resource resources_qup_i2c_gsbi1[] = {
 	{
 		.name	= "gsbi_qup_i2c_addr",

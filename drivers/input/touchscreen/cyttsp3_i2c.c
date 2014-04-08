@@ -9,7 +9,7 @@
  *
  * Copyright (C) 2009-2012 Cypress Semiconductor, Inc.
  * Copyright (C) 2010-2011 Motorola Mobility, Inc.
- * Copyright (C) 2012 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -29,7 +29,6 @@
  *
  */
 
-//#include "cyttsp3_core.h"
 #include <linux/cyttsp3_core.h>
 #include <linux/i2c.h>
 #include <linux/slab.h>
@@ -45,14 +44,14 @@
 #define TOUCH_GPIO_IRQ_CYTTSP		11
 #define TOUCH_GPIO_RST_CYTTSP		52 
 /*---------------------  Static Definitions -------------------------*/
-#define BOOT_DEBUG 1   //0:disable, 1:enable
+#define BOOT_DEBUG 1
 #if(BOOT_DEBUG)
     #define Printhh(string, args...)    printk("CYTTSP_BOOT(K)=> "string, ##args);
 #else
     #define Printhh(string, args...)
 #endif
 
-#define ENG_TIP  0    //give RD information. Set 1 if develop,and set 0 when release.
+#define ENG_TIP  0
 #if(ENG_TIP)
     #define PrintTip(string, args...)    printk("CYTTSP_ENG(K)=> "string, ##args);
 #else
@@ -75,9 +74,6 @@ static int ttsp_i2c_read_block_data(void *handle, u8 addr,
 {
 	struct cyttsp_i2c *ts = container_of(handle, struct cyttsp_i2c, ops);
 	int retval = 0;
-
-
-	//Printhh("[%s] enter...\n", __FUNCTION__);
 
 	if (data == NULL) {
 		pr_err("%s: packet data missing error\n", __func__);
@@ -111,8 +107,6 @@ static int ttsp_i2c_write_block_data(void *handle, u8 addr,
 {
 	struct cyttsp_i2c *ts = container_of(handle, struct cyttsp_i2c, ops);
 	int retval = 0;
-
-	//Printhh("[%s] enter...\n", __FUNCTION__);
 
 	if (data == NULL) {
 		pr_err("%s: packet data missing error\n", __func__);
@@ -148,7 +142,6 @@ static int s_iEnDisLvs2(bool bEn)
 
     reg_lvs2 = regulator_get(&client->dev,"vcc_i2c");
     if (IS_ERR(reg_lvs2)) {
-        //PrintTip("[%s] could not get 8038_lvs2, rc = %ld\n", __FUNCTION__, PTR_ERR(reg_lvs2));
         pr_err("could not get 8038_lvs2, rc = %ld\n", PTR_ERR(reg_lvs2));
         return -ENODEV;
     }
@@ -157,7 +150,6 @@ static int s_iEnDisLvs2(bool bEn)
     {
         rc = regulator_enable(reg_lvs2);
         if (rc) {
-            //PrintTip("[%s] enable lvs2 failed, rc=%d\n", __FUNCTION__, rc);
             pr_err("enable lvs2 failed, rc=%d\n", rc);
             regulator_put(reg_lvs2);
             return -ENODEV;
@@ -167,7 +159,6 @@ static int s_iEnDisLvs2(bool bEn)
     {
         rc = regulator_disable(reg_lvs2);
         if (rc) {
-            //PrintTip("[%s] disable lvs2 failed, rc=%d\n", __FUNCTION__, rc);
             pr_err("disable lvs2 failed, rc=%d\n", rc);
             regulator_put(reg_lvs2);
             return -ENODEV;
@@ -187,7 +178,6 @@ static int s_iEnDisL9(bool bEn)
 
     reg_l9 = regulator_get(&client->dev,"vdd");
     if (IS_ERR(reg_l9)) {
-        //PrintTip("[%s] could not get reg_l9, rc = %ld\n", __FUNCTION__, PTR_ERR(reg_l9));
         pr_err("could not get 8038_reg_l9, rc = %ld\n", PTR_ERR(reg_l9));
         return -ENODEV;
     }
@@ -196,7 +186,6 @@ static int s_iEnDisL9(bool bEn)
     {
         rc = regulator_enable(reg_l9);
         if (rc) {
-            //PrintTip("[%s] enable reg_l9 failed, rc=%d\n", __FUNCTION__, rc);
             pr_err("enable reg_l9 failed, rc=%d\n", rc);
             regulator_put(reg_l9);
             return -ENODEV;
@@ -206,7 +195,6 @@ static int s_iEnDisL9(bool bEn)
     {
         rc = regulator_disable(reg_l9);
         if (rc) {
-            //PrintTip("[%s] disable reg_l9 failed, rc=%d\n", __FUNCTION__, rc);
             pr_err("disable reg_l9 failed, rc=%d\n", rc);
             regulator_put(reg_l9);
             return -ENODEV;
@@ -321,8 +309,6 @@ static int __devinit cyttsp_i2c_probe(struct i2c_client *client,
 	ts->ops.dev = &client->dev;
 	ts->ops.dev->bus = &i2c_bus_type;
 	#if 1
-//    	s_iEnDisLvs2(bEn,&client->dev);
-//    	s_iEnDisL9(bEn,&client->dev);
 
 	  reg_lvs1 = regulator_get(NULL,"8038_lvs1");
             if (IS_ERR(reg_lvs1)) {
@@ -337,7 +323,6 @@ static int __devinit cyttsp_i2c_probe(struct i2c_client *client,
              retval = -ENODEV;
 			goto cyttsp_i2c_probe_exit;
         }
-	    // regulator_put(reg_lvs1);
 	 reg_lvs2 = regulator_get(&client->dev,"vcc_i2c");
 	   if (IS_ERR(reg_lvs2)) {
             pr_err("could not get 8038_lvs2, rc=%ld\n",PTR_ERR(reg_lvs2));
@@ -373,7 +358,7 @@ static int __devinit cyttsp_i2c_probe(struct i2c_client *client,
 			goto cyttsp_i2c_probe_exit;
         }
  	#endif
-	 //msleep(5);
+
 	#if 0 //The first start comunication with slave device
 	cyttsp3_hw_reset();
 	msleep(5);

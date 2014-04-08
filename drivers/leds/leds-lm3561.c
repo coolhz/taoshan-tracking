@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
 */
 #include <linux/init.h>
 #include <linux/kernel.h>
@@ -18,10 +18,10 @@
 #include <linux/err.h>
 #include <linux/regulator/consumer.h>
 #include <linux/leds-lm3561.h>
-#include <asm/io.h> //2012/12/12
-#include <mach/msm_iomap.h> //2012/12/12
+#include <asm/io.h>
+#include <mach/msm_iomap.h>
 
-//LM3561 register macros
+//LM3561 (Camera flashlight LED) register macros 
 #define SALVE_ID_W              	0xa6
 #define SALVE_ID_R              	0xa7
 #define REG_ENABLE                  0x10
@@ -34,7 +34,6 @@
 #define REG_FLAGS                   0xd0
 #define REG_CONFIGURATION_1         0xe0
 #define REG_CONFIGURATION_2         0xf0
-//B 2012/08/06
 #define MASK_REG_ENABLE                 0x07
 #define MASK_REG_INDICATOR_BRIGHTNESS   0x07
 #define MASK_REG_GPIO                   0x7f
@@ -45,7 +44,6 @@
 #define MASK_REG_FLAGS                  0xbf
 #define MASK_REG_CONFIGURATION_1        0xfc
 #define MASK_REG_CONFIGURATION_2        0x0f
-//E 2012/08/06
 
 #define DEFAULT_VOLTAGE_TORCH 130800
 #define DEFAULT_VOLTAGE_FLASH 500000
@@ -80,7 +78,6 @@ struct deferred_led_change {
 unsigned int strobe_state = 0;
 unsigned int flash_state = 0;
 unsigned int reset_state = 0;
-//B 2012/08/06
 unsigned int suspend_state = 0;
 unsigned int duration = 0;
 unsigned int timeout[32] = 
@@ -90,24 +87,21 @@ unsigned int timeout[32] =
    544, 576, 608, 640, 672, 704, 736, 768,
    800, 832, 864, 896, 928, 960, 992, 1024
 };
-//E 2012/08/06
 
-int led_i2c_write(struct i2c_client *client, u8 cReg, u8 data) //2012/08/06
+int led_i2c_write(struct i2c_client *client, u8 cReg, u8 data)
 {
 	u8 buf[2];
-
 	memset(buf, 0X0, sizeof(buf));
-
 	buf[0] = cReg;
 	buf[1] = data;
 
 	return i2c_master_send(client, buf, 2);
 }
 
-u8 led_i2c_read(struct i2c_client *client, u8 cReg) //2012/08/06
+u8 led_i2c_read(struct i2c_client *client, u8 cReg)
 {
 	int retry;
-    u8 data;
+        u8 data;
 
 	struct i2c_msg msg[] = {
 	    {
@@ -137,23 +131,20 @@ u8 led_i2c_read(struct i2c_client *client, u8 cReg) //2012/08/06
 }
 
 struct led_classdev* lm3561_init(void) {
-    enable_lm3561();//2012/12/12
+    enable_lm3561();
     return &private_data->led;
 }
 EXPORT_SYMBOL(lm3561_init);
 
-//B 2012/08/20
 void lm3561_release(struct led_classdev *led_cdev) {
     if (led_cdev != NULL) {
-        //B 2012/12/12
         if (!gpio_is_valid(GPIO_CAM_FLASH_CNTL_EN))        
             gpio_free(GPIO_MSM_FLASH_STROBE);
         if (!gpio_is_valid(GPIO_MSM_FLASH_STROBE))
             gpio_free(GPIO_CAM_FLASH_CNTL_EN);
-        //E 2012/12/12
     }
 }
-//E 2012/08/20
+
 EXPORT_SYMBOL(lm3561_release);
 
 int lm3561_set_power(bool on)
@@ -161,7 +152,6 @@ int lm3561_set_power(bool on)
     static struct regulator *reg_lvs1 = NULL;
     int rc = 0;
 
-    //B 2012/08/07
     if (on) {
         if (reg_lvs1 == NULL) {
             reg_lvs1 = regulator_get(NULL,"8038_lvs1");
@@ -174,7 +164,7 @@ int lm3561_set_power(bool on)
         if (rc) {
             pr_err("enable lvs1 failed, rc=%d\n", rc);
             regulator_put(reg_lvs1);
-            reg_lvs1 = NULL;//2012/08/09
+            reg_lvs1 = NULL;
             return -ENODEV;
         }
     } else {
@@ -183,14 +173,13 @@ int lm3561_set_power(bool on)
             if (rc) {
                 pr_err("disable lvs1 failed, rc=%d\n", rc);
                 regulator_put(reg_lvs1);
-                reg_lvs1 = NULL;//2012/08/09
+                reg_lvs1 = NULL;
                 return -ENODEV;
             }
             regulator_put(reg_lvs1);
-            reg_lvs1 = NULL;//2012/08/09
+            reg_lvs1 = NULL;
         }
     }
-    //E 2012/08/07
     return rc;
 }
 
@@ -199,12 +188,10 @@ void lm3561_torch_set(struct led_classdev *led_cdev, enum led_brightness brightn
     int ret = 0;
     struct lm3561_led_data *led_data;
     
-    //B 2012/08/20
     if (led_cdev == NULL) {
         printk("%s: NULL pointer\n", __func__);
         return;
     }
-    //E 2012/08/20    
 
     led_data = container_of(led_cdev, struct lm3561_led_data, led);
     
@@ -217,15 +204,11 @@ void lm3561_torch_set(struct led_classdev *led_cdev, enum led_brightness brightn
             if (ret < 0)
                 printk("%s, write REG_ENABLE failed", __func__);
    	    }
-        //B 2012/08/06
         if (suspend_state == 1)
             disable_lm3561();
-        //E 2012/08/06
     } else {
-        //B 2012/08/06
         if (suspend_state == 1)
             enable_lm3561();
-        //E 2012/08/06
         ret = led_i2c_write(led_data->client, REG_ENABLE, 0x02);
     	if (ret < 0) {
             printk("%s, write REG_ENABLE failed", __func__);
@@ -243,12 +226,10 @@ void lm3561_flash_set(struct led_classdev *led_cdev, enum led_brightness brightn
     int ret = 0;
     struct lm3561_led_data *led_data;
     
-    //B 2012/08/20
     if (led_cdev == NULL) {
         printk("%s: NULL pointer\n", __func__);
         return;
     }
-    //E 2012/08/20
     
     led_data = container_of(led_cdev, struct lm3561_led_data, led);
     
@@ -261,15 +242,11 @@ void lm3561_flash_set(struct led_classdev *led_cdev, enum led_brightness brightn
             if (ret < 0)
                 printk("%s, write REG_ENABLE failed", __func__);
    	    }
-        //B 2012/08/09
         if (suspend_state == 1)
             disable_lm3561();
-        //E 2012/08/09
     } else {
-        //B 2012/08/06
         if (suspend_state == 1)
             enable_lm3561();
-        //E 2012/08/06
         ret = led_i2c_write(led_data->client, REG_ENABLE, 0x03);
     	if (ret < 0) {
             printk("%s, write REG_ENABLE failed", __func__);
@@ -278,12 +255,10 @@ void lm3561_flash_set(struct led_classdev *led_cdev, enum led_brightness brightn
             if (ret < 0)
                 printk("%s, write REG_ENABLE failed", __func__);
    	    }
-        //B 2012/08/06
         mdelay(timeout[duration]);
         flash_state = 0;
         if (suspend_state == 1)
             disable_lm3561();
-        //E 2012/08/06
     }
 }
 EXPORT_SYMBOL(lm3561_flash_set);
@@ -296,7 +271,6 @@ static void change_flash(struct work_struct *flash_change_data)
 	int flash = flash_change->flash;
 
 	lm3561_flash_set(led_cdev, flash);
-
 	/* Free up memory for the freq_change structure. */
 	kfree(flash_change);
 }
@@ -316,7 +290,6 @@ int queue_flash_change(struct led_classdev *led_cdev, int flash)
 	queue_work(suspend_work_queue, &(flash_change->led_change_work));
 
 	return 0;
-
 }
 #endif
 
@@ -355,21 +328,19 @@ static DEVICE_ATTR(flash, 0644, lm3561_flash_show, lm3561_flash_store);
 
 void lm3561_strobe_set(struct led_classdev *led_cdev, int strobe)
 {
-    //B 2012/08/06
     if (suspend_state == 1)
         enable_lm3561();
 
-    if (gpio_is_valid(GPIO_MSM_FLASH_STROBE))//2012/12/12
-        gpio_set_value_cansleep(GPIO_MSM_FLASH_STROBE, strobe);          //GPIO output=0
+    if (gpio_is_valid(GPIO_MSM_FLASH_STROBE))
+        gpio_set_value_cansleep(GPIO_MSM_FLASH_STROBE, strobe);
 
     strobe_state = 1;
     mdelay(timeout[duration]);
-    if (gpio_is_valid(GPIO_MSM_FLASH_STROBE))//2012/12/12
+    if (gpio_is_valid(GPIO_MSM_FLASH_STROBE))
         gpio_set_value_cansleep(GPIO_MSM_FLASH_STROBE, 0);
     strobe_state = 0;
     if (suspend_state == 1)
         disable_lm3561();
-    //E 2012/08/06
 }
 EXPORT_SYMBOL(lm3561_strobe_set);
 
@@ -442,7 +413,7 @@ void lm3561_reset_set(struct led_classdev *led_cdev, int reset)
     struct lm3561_led_data *led_data;
     
     led_data = container_of(led_cdev, struct lm3561_led_data, led);
-    //B 2012/12/12
+
     if (!gpio_is_valid(GPIO_CAM_FLASH_CNTL_EN)) {
         if (gpio_request(GPIO_CAM_FLASH_CNTL_EN, "lm3561_en"))
 		    printk(KERN_ERR "failed to request gpio lm3561_en\n");
@@ -451,18 +422,15 @@ void lm3561_reset_set(struct led_classdev *led_cdev, int reset)
         if (gpio_request(GPIO_MSM_FLASH_STROBE, "lm3561_strobe"))
 		    printk(KERN_ERR "failed to request gpio lm3561_strobe\n");    
     }
-    //E 2012/12/12
     if (reset) {
-        //B 2012/12/12
         if (gpio_is_valid(GPIO_CAM_FLASH_CNTL_EN)) {
-            //B 2012/08/06
             gpio_set_value_cansleep(GPIO_CAM_FLASH_CNTL_EN, 0);          //GPIO output=0
             mdelay(10);
             gpio_set_value_cansleep(GPIO_CAM_FLASH_CNTL_EN, 1);          //GPIO output=1
             mdelay(50);
-            //E 2012/08/06
+
         }
-        //E 2012/12/12
+
         ret = led_i2c_write(led_data->client, REG_VIN_MONITOR, 0x01);
         if (ret < 0) {
             printk("%s: write REG_VIN_MONITOR failed\n", __func__);
@@ -478,11 +446,11 @@ void lm3561_reset_set(struct led_classdev *led_cdev, int reset)
             printk("%s: write REG_FLASH_BRIGHTNESS failed\n", __func__);
         }
         
-        ret = led_i2c_write(led_data->client, REG_FLASH_DURATION, 0x20 | duration);//2012/08/06
+        ret = led_i2c_write(led_data->client, REG_FLASH_DURATION, 0x20 | duration);
 	    if (ret < 0) {
             printk("%s: write REG_FLASH_DURATION failed\n", __func__);
         }
-        //B 2012/12/19
+
         if (board_type_with_hw_id() <= DVT2_BOARD_HW_ID) {
             ret = led_i2c_write(led_data->client, REG_CONFIGURATION_1, 0x7c);
         } else {
@@ -497,11 +465,11 @@ void lm3561_reset_set(struct led_classdev *led_cdev, int reset)
         } else {
             ret = led_i2c_write(led_data->client, REG_CONFIGURATION_2, 0x08);
         }
-        //E 2012/12/19
+
 	    if (ret < 0) {
             printk("%s: write REG_CONFIGURATION_2 failed\n", __func__);
         }
-        //B 2012/08/06
+
         printk("%s: REG_ENABLE = 0x%x\n", __func__, led_i2c_read(led_data->client, REG_ENABLE) & MASK_REG_ENABLE);
         printk("%s: REG_INDICATOR_BRIGHTNESS = 0x%x\n", __func__, led_i2c_read(led_data->client, REG_INDICATOR_BRIGHTNESS) & MASK_REG_INDICATOR_BRIGHTNESS);
         printk("%s: REG_GPIO = 0x%x\n", __func__, led_i2c_read(led_data->client, REG_GPIO) & MASK_REG_GPIO);
@@ -512,7 +480,6 @@ void lm3561_reset_set(struct led_classdev *led_cdev, int reset)
         printk("%s: REG_FLAGS = 0x%x\n", __func__, led_i2c_read(led_data->client, REG_FLAGS) & MASK_REG_FLAGS);
         printk("%s: REG_CONFIGURATION_1 = 0x%x\n", __func__, led_i2c_read(led_data->client, REG_CONFIGURATION_1) & MASK_REG_CONFIGURATION_1);
         printk("%s: REG_CONFIGURATION_2 = 0x%x\n", __func__, led_i2c_read(led_data->client, REG_CONFIGURATION_2) & MASK_REG_CONFIGURATION_2);
-        //E 2012/08/06
     }
 }
 
@@ -579,12 +546,9 @@ static ssize_t lm3561_reset_store(struct device *dev, struct device_attribute *a
 }
 static DEVICE_ATTR(reset, 0644, lm3561_reset_show, lm3561_reset_store);
 
-void enable_lm3561(void)//2012/08/06
+void enable_lm3561(void)
 {
-    //B 2012/08/09
-    //lm3561_reset_set(&private_data->led, 1);
     lm3561_set_power(true);
-    //B 2012/12/12
     if (!gpio_is_valid(GPIO_CAM_FLASH_CNTL_EN)) {
         if (gpio_request(GPIO_CAM_FLASH_CNTL_EN, "lm3561_en"))
 		    printk(KERN_ERR "failed to request gpio lm3561_en\n");
@@ -593,22 +557,17 @@ void enable_lm3561(void)//2012/08/06
         if (gpio_request(GPIO_MSM_FLASH_STROBE, "lm3561_strobe"))
 		    printk(KERN_ERR "failed to request gpio lm3561_strobe\n");
     }    
-    //E 2012/12/12
-    //E 2012/08/09
+
 	return;
 }
 
-void disable_lm3561(void)//2012/08/06
+void disable_lm3561(void)
 {
-    //B 2012/08/09
-    if (!gpio_is_valid(GPIO_CAM_FLASH_CNTL_EN))//2012/12/12
-        //B 2012/08/06
+    if (!gpio_is_valid(GPIO_CAM_FLASH_CNTL_EN))
         gpio_free(GPIO_MSM_FLASH_STROBE);
-    if (!gpio_is_valid(GPIO_MSM_FLASH_STROBE))//2012/12/12
+    if (!gpio_is_valid(GPIO_MSM_FLASH_STROBE))
         gpio_free(GPIO_CAM_FLASH_CNTL_EN);
-        //E 2012/08/06
-    
-    //E 2012/08/09
+
 	lm3561_set_power(false);
 	return;
 }
@@ -629,14 +588,14 @@ static int lm3561_remove(struct i2c_client *client)
 #ifdef CONFIG_HAS_EARLYSUSPEND
 void lm3561_early_suspend(struct early_suspend *h)
 {
-	disable_lm3561();    //cut lm3561 power
-	suspend_state = 1;//2012/08/06
+	disable_lm3561(); //cut lm3561 power
+	suspend_state = 1;
 }
 
 void lm3561_later_resume(struct early_suspend *h)
 {
 	enable_lm3561();
-    suspend_state = 0;//2012/08/06
+    suspend_state = 0;
 }
 #endif
 
@@ -672,12 +631,12 @@ static int __devinit leds_lm3561_probe(struct i2c_client *client, const struct i
         goto err_probe_failed;
     }
     
-    ret = led_i2c_write(client, REG_FLASH_DURATION, 0x20 | duration);//2012/08/06
+    ret = led_i2c_write(client, REG_FLASH_DURATION, 0x20 | duration);
 	if (ret < 0) {
         printk("%s: write REG_FLASH_DURATION failed\n", __func__);
         goto err_probe_failed;
     }
-    //B 2012/12/19
+
     if (board_type_with_hw_id() <= DVT2_BOARD_HW_ID) {
         ret = led_i2c_write(client, REG_CONFIGURATION_1, 0x7c);
     } else {
@@ -692,12 +651,12 @@ static int __devinit leds_lm3561_probe(struct i2c_client *client, const struct i
     } else {
         ret = led_i2c_write(client, REG_CONFIGURATION_2, 0x08);
     }
-    //E 2012/12/19
+
 	if (ret < 0) {
         printk("%s: write REG_CONFIGURATION_2 failed\n", __func__);
         goto err_probe_failed;
     }
-    //B 2012/08/06
+
     printk("%s: REG_ENABLE = 0x%x\n", __func__, led_i2c_read(client, REG_ENABLE) & MASK_REG_ENABLE);
     printk("%s: REG_INDICATOR_BRIGHTNESS = 0x%x\n", __func__, led_i2c_read(client, REG_INDICATOR_BRIGHTNESS) & MASK_REG_INDICATOR_BRIGHTNESS);
     printk("%s: REG_GPIO = 0x%x\n", __func__, led_i2c_read(client, REG_GPIO) & MASK_REG_GPIO);
@@ -708,8 +667,7 @@ static int __devinit leds_lm3561_probe(struct i2c_client *client, const struct i
     printk("%s: REG_FLAGS = 0x%x\n", __func__, led_i2c_read(client, REG_FLAGS) & MASK_REG_FLAGS);
     printk("%s: REG_CONFIGURATION_1 = 0x%x\n", __func__, led_i2c_read(client, REG_CONFIGURATION_1) & MASK_REG_CONFIGURATION_1);
     printk("%s: REG_CONFIGURATION_2 = 0x%x\n", __func__, led_i2c_read(client, REG_CONFIGURATION_2) & MASK_REG_CONFIGURATION_2);
-    //E 2012/08/06
-		
+
 	lm3561_i2c_client = client;
 	data->client = client;
 	i2c_set_clientdata(client, data);
@@ -772,7 +730,6 @@ MODULE_DEVICE_TABLE(i2c, lm3561_id);
 
 static struct i2c_driver lm3561_i2c_driver = {
         .driver = {
-//		.owner	= THIS_MODULE,
 		.name = "lm3561",
 	}, 
         .probe  = leds_lm3561_probe,
@@ -788,7 +745,6 @@ static int __init leds_lm3561_init(void)
     
 	printk("%s\n", __func__);
     lm3561_set_power(true);   
-    //B 2012/12/12
     if (!gpio_is_valid(GPIO_CAM_FLASH_CNTL_EN)) {
         if (gpio_request(GPIO_CAM_FLASH_CNTL_EN, "lm3561_en"))
 		    printk(KERN_ERR "failed to request gpio lm3561_en\n");
@@ -798,18 +754,15 @@ static int __init leds_lm3561_init(void)
         if (gpio_request(GPIO_MSM_FLASH_STROBE, "lm3561_strobe"))
 		    printk(KERN_ERR "failed to request gpio lm3561_strobe\n");
     }
-    //E 2012/12/12
     gpio_tlmm_config(config, 0);
-    //B 2012/08/06
-    //mdelay(100);
     mdelay(50);
-    if (gpio_is_valid(GPIO_CAM_FLASH_CNTL_EN))//2012/12/12
-   	    gpio_set_value_cansleep(GPIO_CAM_FLASH_CNTL_EN, 1);          //GPIO output=0
-   	if (gpio_is_valid(GPIO_MSM_FLASH_STROBE))//2012/12/12
-	    gpio_set_value_cansleep(GPIO_MSM_FLASH_STROBE, 0);          //GPIO output=0
+    if (gpio_is_valid(GPIO_CAM_FLASH_CNTL_EN))
+   	    gpio_set_value_cansleep(GPIO_CAM_FLASH_CNTL_EN, 1);
+   	if (gpio_is_valid(GPIO_MSM_FLASH_STROBE))
+	    gpio_set_value_cansleep(GPIO_MSM_FLASH_STROBE, 0);
     mdelay(50);
     duration = 0xf;
-    //E 2012/08/06
+
     ret = i2c_add_driver(&lm3561_i2c_driver);
 	if (ret) {
 		printk(KERN_ERR "leds_lm3561_init: i2c_add_driver() failed\n");

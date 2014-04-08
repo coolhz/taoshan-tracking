@@ -47,7 +47,7 @@ unsigned int msm_shared_ram_phys = 0x00100000;
 
 #ifdef CONFIG_CCI_KLOG
 unsigned int msm_klog_phys = CCI_KLOG_START_ADDR_PHYSICAL;
-#endif // #ifdef CONFIG_CCI_KLOG
+#endif
 
 
 static void __init msm_map_io(struct map_desc *io_desc, int size)
@@ -64,10 +64,10 @@ static void __init msm_map_io(struct map_desc *io_desc, int size)
 		if (io_desc[i].virtual == (unsigned long)MSM_KLOG_BASE)
 			io_desc[i].pfn = __phys_to_pfn(msm_klog_phys);
 	}
-#else // #ifdef CONFIG_CCI_KLOG
+#else
 		if (io_desc[i].virtual == (unsigned long)MSM_SHARED_RAM_BASE)
 			io_desc[i].pfn = __phys_to_pfn(msm_shared_ram_phys);
-#endif // #ifdef CONFIG_CCI_KLOG
+#endif
 
 
 	iotable_init(io_desc, size);
@@ -263,7 +263,7 @@ static struct map_desc msm8930_io_desc[] __initdata = {
 		.length =   MSM_KLOG_SIZE,
 		.type =     MT_DEVICE,
 	},
-#endif // #ifdef CONFIG_CCI_KLOG
+#endifs
 
 #ifdef CONFIG_DEBUG_MSM8930_UART
 	MSM_DEVICE(DEBUG_UART),

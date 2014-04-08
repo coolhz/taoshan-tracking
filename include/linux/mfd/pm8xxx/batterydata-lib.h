@@ -22,7 +22,7 @@
 #define PC_CC_COLS             13
 
 #define PC_TEMP_ROWS		29
-#ifdef ORG_VER//LO
+#ifdef ORG_VER
 #define PC_TEMP_COLS		8
 #else
 #define PC_TEMP_COLS		10

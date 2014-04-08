@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,18 +64,14 @@ struct pn65n_dev    {
     unsigned int        firm_gpio;
     unsigned int        irq_gpio;
     atomic_t            irq_enabled;
-
-    
     atomic_t            disable_in_suspend;   // If SIM card don't have NFC feature, we can disable the screen off card emulation
 };
 
 static void pn65n_gpio_init(struct pn65n_i2c_platform_data *platform_data)
 {
-    //B: Robert, 20120808
     gpio_tlmm_config(GPIO_CFG(platform_data->irq_gpio, 0, GPIO_CFG_INPUT, GPIO_CFG_PULL_DOWN, GPIO_CFG_2MA), GPIO_CFG_ENABLE);
     gpio_tlmm_config(GPIO_CFG(platform_data->firm_gpio, 0, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_2MA), GPIO_CFG_ENABLE);
     gpio_tlmm_config(GPIO_CFG(platform_data->ven_gpio, 0, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_2MA), GPIO_CFG_ENABLE);
-    //E: Robert, 20120808
 }
 
 static int pn65n_power(int on)
@@ -137,14 +133,10 @@ static int pn65n_enable_ven(int enable, struct pn65n_dev *pn65n_dev_data)
     if( enable )
     {
         gpio_set_value_cansleep(pn65n_dev_data->ven_gpio, 1);
-        //gpio_set_value(pn65n_dev_data->ven_gpio, 1);
-        //printk("NFC -> NFC_EXT_EN high\n");
     }
     else
     {
         gpio_set_value_cansleep(pn65n_dev_data->ven_gpio, 0);
-        //gpio_set_value(pn65n_dev_data->ven_gpio, 0);
-        //printk("NFC -> NFC_EXT_EN low\n");
     }
 
     return 0;
@@ -157,12 +149,10 @@ static int pn65n_enable_firm(int enable, struct pn65n_dev *pn65n_dev_data)
     if( enable )
     {
         gpio_set_value(pn65n_dev_data->firm_gpio, 1);
-        //printk("NFC -> NFC_DL high\n");
     }
     else
     {
         gpio_set_value(pn65n_dev_data->firm_gpio, 0);
-        //printk("NFC -> NFC_DL low\n");
     }
 
     return 0;
@@ -490,7 +480,7 @@ static int pn65n_resume(struct i2c_client *client)
     if( pn65n_dev == NULL ) return 0;
 
     if (atomic_read(&pn65n_dev->disable_in_suspend) == 1) {
-        gpio_set_value_cansleep(pn65n_dev->ven_gpio,0); //Drive PN65O:VEN to high
+        gpio_set_value_cansleep(pn65n_dev->ven_gpio,0);
     }
 
     return 0;

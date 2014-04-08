@@ -1,5 +1,5 @@
 /* Copyright (c) 2012, Code Aurora Forum. All rights reserved.
- * Copyright (C) 2012 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -18,7 +18,6 @@
 #define PLATFORM_DRIVER_NAME "msm_camera_imx134"
 #define imx134_obj imx134_##obj
 
-//S  JackBB 2012/12/3 [Q111M]
 /* Register addresses for HDR control */
 #define SHORT_SHUTTER_WORD_ADDR                0x0230
 #define SHORT_GAIN_BYTE_ADDR           0x0233
@@ -39,7 +38,7 @@
 #define TC_OUT_MID_WORD_ADDR           0x4454
 #define TC_OUT_SAT_WORD_ADDR           0x4456
 
-#define LSC_TABLE_LEN_BYTES                    280 //504  //for IMX134 it is {7 X 5} => 280
+#define LSC_TABLE_LEN_BYTES        280 //for IMX134 it is {7 X 5} => 280
 #define IMX135_TC_SWITCH_ENABLE 0
 
 /*Adaptive tone reproduction curve*/
@@ -47,15 +46,15 @@
 #define INIT_ATR_OUT_MID       0xA00
 #define INIT_ATR_OUT_SAT       0xFFF
 #define ATR_OFFSET             0x00    
-// Luke 0701 HDR video
-#define THRESHOLD_DEAD_ZONE    30 //3// 255 /*lokesh:  just a hack */
-#define THRESHOLD_0            30 //3 //20 /*lokesh: th0 should be same as deadzone*/       
-#define THRESHOLD_1            42//13
+//HDR video
+#define THRESHOLD_DEAD_ZONE    30
+#define THRESHOLD_0            30
+#define THRESHOLD_1            42
 #define INIT_ATR_GAIN          0.5 
 
 /*Controlling Over exposure*/
 #define Y_STATS_DIFF_THRESHOLD 50
-#define Y_OVER_EXP_THRESHOLD   192 //768
+#define Y_OVER_EXP_THRESHOLD   192
 #define FRAME_MINIMUM_INPUT    60
 
 #define DEBUG_AVG_BYTE_ADDR    0x4470
@@ -63,7 +62,6 @@
 #define DEBUG_MAX_BYTE_ADDR    0x4474
 #define DEBUG_SEL_BYTE_ADDR    0x4476
 
-//E  JackBB 2012/12/3 [Q111M]
 
 DEFINE_MUTEX(imx134_mut);
 static struct msm_sensor_ctrl_t imx134_s_ctrl;
@@ -76,7 +74,6 @@ static struct msm_camera_i2c_reg_conf imx134_stop_settings[] = {
 	{0x0100, 0x00},
 	{0x3A43, 0x01},
 };
-//B 2012/11/06
 static struct msm_camera_i2c_reg_conf imx134_flash_settings[] = {
   	{0x0100, 0x01},
    	{0x0800, 0x01},
@@ -88,7 +85,6 @@ static struct msm_camera_i2c_reg_conf imx134_flash_settings[] = {
         {0x3104, 0x00},
         {0x3108, 0x01},
 };
-//E 2012/11/06
 static struct msm_camera_i2c_reg_conf imx134_groupon_settings[] = {
 	{0x0104, 0x01},
 };
@@ -102,7 +98,6 @@ static struct msm_camera_i2c_reg_conf imx134_prev_settings[] = {
         1/2HV
         H : 1640
         V : 1232  */
-	/* PLL setting 20120824*/
     {0x011E, 0x18},
     {0x011F, 0x00},
     {0x0301, 0x05},
@@ -117,7 +112,7 @@ static struct msm_camera_i2c_reg_conf imx134_prev_settings[] = {
     {0x030D, 0x64},
     {0x030E, 0x01},
     {0x3A06, 0x12},
-    {0x0101, 0x03},//2012/09/19
+    {0x0101, 0x03},
     {0x0105, 0x00},
     {0x0108, 0x03},
     {0x0109, 0x30},
@@ -218,7 +213,6 @@ static struct msm_camera_i2c_reg_conf imx134_snap_settings[] = {
         H : 3280
         V : 2464
         */
-	/* PLL setting 20120824*/
     {0x011E, 0x18},
     {0x011F, 0x00},
     {0x0301, 0x05},
@@ -233,7 +227,7 @@ static struct msm_camera_i2c_reg_conf imx134_snap_settings[] = {
     {0x030D, 0x64},
     {0x030E, 0x01},
     {0x3A06, 0x11},
-    {0x0101, 0x03},//2012/09/19
+    {0x0101, 0x03},
     {0x0105, 0x00},
     {0x0108, 0x03},
     {0x0109, 0x30},
@@ -339,7 +333,7 @@ static struct msm_camera_i2c_reg_conf imx134_snap_settings[] = {
 };
 
 static struct msm_camera_i2c_reg_conf imx134_recommend_settings[] = {
-	/* global setting 20120824*/
+	/* global setting */
     {0x0220, 0x01},
     {0x0250, 0x0B},
     {0x3302, 0x11},
@@ -385,7 +379,6 @@ static struct msm_camera_i2c_reg_conf imx134_recommend_settings[] = {
     {0x3519, 0x94},
     {0x364F, 0x00},
 
-    /*B:20120924*/
     /* Image Quality adjustment setting */
     //Bypass Settings		
     {0x0700, 0x00},
@@ -477,14 +470,12 @@ static struct msm_camera_i2c_reg_conf imx134_recommend_settings[] = {
     {0x4445, 0x00},
     {0x4446, 0x3F},
     {0x4447, 0xFF},
-/*S JackBB 2012/10/24 */
-    {0x4452, 0x00},//Out_Noise high
-    {0x4453, 0x80},//Out_Noise low
-    {0x4454, 0x08},//Out_Mid high
-    {0x4455, 0xFF},//Out_Mid low
-    {0x4456, 0x06},//Out_Sat high
-    {0x4457, 0xFF},//Out_Sat low
-/*E JackBB 2012/10/24  */
+    {0x4452, 0x00},
+    {0x4453, 0x80},
+    {0x4454, 0x08},
+    {0x4455, 0xFF},
+    {0x4456, 0x06},
+    {0x4457, 0xFF},
     {0x4458, 0x18},
     {0x4459, 0x18},
     {0x445A, 0x3F},
@@ -493,16 +484,13 @@ static struct msm_camera_i2c_reg_conf imx134_recommend_settings[] = {
     {0x4463, 0x00},
     {0x4464, 0x00},
     {0x4465, 0x00},
-    /*E:20120924*/
 };
 
-/*B:20120913 */
 static struct msm_camera_i2c_reg_conf imx134_hdr_video_settings[] = {
   /* reg_B
         HDR  movie (4:3)
         H : 1640
         V : 1232  */
-	/* PLL setting 20120824*/
     {0x011E, 0x18},
     {0x011F, 0x00},
     {0x0301, 0x05},
@@ -517,7 +505,7 @@ static struct msm_camera_i2c_reg_conf imx134_hdr_video_settings[] = {
     {0x030D, 0x64},
     {0x030E, 0x01},
     {0x3A06, 0x12},
-    {0x0101, 0x03},//2012/0919 Jiahan_Li
+    {0x0101, 0x03},
     {0x0105, 0x00},
     {0x0108, 0x03},
     {0x0109, 0x30},
@@ -604,20 +592,17 @@ static struct msm_camera_i2c_reg_conf imx134_hdr_video_settings[] = {
     {0x0233, 0x00},
     {0x0234, 0x00},
     {0x0235, 0x40},
-/*S:[bug856] Set AE_SAT and WB_LMT for HDR direct mode , Jim Lai 20121108 */
     {0x0238, 0x01},
     {0x0239, 0x08},
     {0x441E, 0x3B},
     {0x441F, 0xF0},
     {0x4446, 0x3B},
     {0x4447, 0xF0},
-/*E:[bug856] Set AE_SAT and WB_LMT for HDR direct mode , Jim Lai 20121108 */
     {0x33B0, 0x06},
     {0x33B1, 0x68},
     {0x33B3, 0x02},
     {0x3800, 0x00}
 };
-/*E:20120913 */
 
 static struct msm_camera_i2c_reg_conf imx134_60fps_settings[] = {
   /* reg_E-2
@@ -625,7 +610,6 @@ static struct msm_camera_i2c_reg_conf imx134_60fps_settings[] = {
      *60fps"
      H : 820
      V : 616 */
-	/* PLL setting 20120916*/
     {0x011E, 0x18},
     {0x011F, 0x00},
     {0x0301, 0x05},
@@ -640,7 +624,7 @@ static struct msm_camera_i2c_reg_conf imx134_60fps_settings[] = {
     {0x030D, 0x32},
     {0x030E, 0x01},
     {0x3A06, 0x12},
-    {0x0101, 0x03},//2012/09/19
+    {0x0101, 0x03},
     {0x0105, 0x00},
     {0x0108, 0x03},
     {0x0109, 0x30},
@@ -741,7 +725,6 @@ static struct msm_camera_i2c_reg_conf imx134_120fps_settings[] = {
      *120fps"
      H : 820
      V : 616 */
-	/* PLL setting 20120824*/
     {0x011E, 0x18},
     {0x011F, 0x00},
     {0x0301, 0x05},
@@ -756,7 +739,7 @@ static struct msm_camera_i2c_reg_conf imx134_120fps_settings[] = {
     {0x030D, 0x64},
     {0x030E, 0x01},
     {0x3A06, 0x12},
-    {0x0101, 0x03},//2012/09/19
+    {0x0101, 0x03},
     {0x0105, 0x00},
     {0x0108, 0x03},
     {0x0109, 0x30},
@@ -850,10 +833,8 @@ static struct msm_camera_i2c_reg_conf imx134_120fps_settings[] = {
     {0x33B3, 0x00},
 };
 
-/*B:20121103*/
 static struct msm_camera_i2c_reg_conf imx134b_prev_settings[] = {
-  /* 20121107
-    reg_C
+  /* reg_C
     1/2HV
     H : 1640
     V : 1232  */
@@ -886,7 +867,6 @@ static struct msm_camera_i2c_reg_conf imx134b_prev_settings[] = {
     {0x4082, 0x01},
     {0x4083, 0x01},
     {0x7006, 0x04},
-    //OptionnalFunction setting		
     {0x0700, 0x00},
     {0x3A63, 0x00},
     {0x4100, 0xF8},
@@ -973,7 +953,7 @@ static struct msm_camera_i2c_reg_conf imx134b_prev_settings[] = {
 };
 
 static struct msm_camera_i2c_reg_conf imx134b_snap_settings[] = {
-  /* 20121107
+  /*
    reg_A
    Full-resolution     *30fps
    H : 3280
@@ -1095,7 +1075,7 @@ static struct msm_camera_i2c_reg_conf imx134b_snap_settings[] = {
 
 static struct msm_camera_i2c_reg_conf imx134b_recommend_settings[] = {
     /* global setting 20121107*/
-    {0x0101, 0x03},//2012/09/19
+    {0x0101, 0x03},
     {0x0105, 0x01},
     {0x0110, 0x00},
     {0x0220, 0x01},
@@ -1252,25 +1232,19 @@ static struct msm_camera_i2c_reg_conf imx134b_recommend_settings[] = {
     {0x441A, 0x20},
     {0x441B, 0x00},
     {0x441D, 0x40},
-//    {0x441E, 0x0E},
-//    {0x441F, 0xFC},
     {0x441E, 0x1E},
     {0x441F, 0x38},
     {0x4420, 0x01},
     {0x4444, 0x00},
     {0x4445, 0x00},
-//    {0x4446, 0x0E},
-//    {0x4447, 0xFC},
     {0x4446, 0x1D},
     {0x4447, 0xF9},
-/*S JackBB 2012/10/24 */
-    {0x4452, 0x00},//Out_Noise high
-    {0x4453, 0x80},//Out_Noise low
-    {0x4454, 0x08},//Out_Mid high
-    {0x4455, 0x00},//Out_Mid low
-    {0x4456, 0x06},//Out_Sat high
-    {0x4457, 0x00},//Out_Sat low
-/*E JackBB 2012/10/24 */
+    {0x4452, 0x00},
+    {0x4453, 0x80},
+    {0x4454, 0x08},
+    {0x4455, 0x00},
+    {0x4456, 0x06},
+    {0x4457, 0x00},
     {0x4458, 0x18},
     {0x4459, 0x18},
     {0x445A, 0x3F},
@@ -1303,8 +1277,7 @@ static struct msm_camera_i2c_reg_conf imx134b_recommend_settings[] = {
     {0x4500, 0x1F},
 };
 static struct msm_camera_i2c_reg_conf imx134b_hdr_video_settings[] = {
-  /* 20121017
-     reg_B
+  /*  reg_B
      HDR  movie (4:3)
       H : 1632
       V : 1232 */
@@ -1420,7 +1393,7 @@ static struct msm_camera_i2c_reg_conf imx134b_hdr_video_settings[] = {
        {0x0233, 0x00},
        {0x0234, 0x00},
        {0x0235, 0x40},
-       {0x0238, 0x01},//JackBB 2012/12/20
+       {0x0238, 0x01},
        {0x0239, 0x04},
        {0x023B, 0x03},
        {0x023C, 0x01},
@@ -1430,7 +1403,6 @@ static struct msm_camera_i2c_reg_conf imx134b_hdr_video_settings[] = {
        {0x33B4, 0x00},
        {0x3800, 0x00},
 #if 1
-/*S:[bug1099] LSC Setting for HDR video feature , JackBB 20120921 */
     {0x4800, 0x02},//R00
     {0x4801, 0x45},//R00
     {0x4802, 0x02},//GR00
@@ -1717,12 +1689,7 @@ static struct msm_camera_i2c_reg_conf imx134b_hdr_video_settings[] = {
     {0x3A63, 0x01},//RAM_SEL_Toggle
 #endif
 };
-/*E:20121103*/
 
-/*
-static struct msm_camera_i2c_reg_conf imx134_LSCTable_settings[] = {
-
- };*/
 
 static struct v4l2_subdev_info imx134_subdev_info[] = {
 	{
@@ -1737,10 +1704,6 @@ static struct v4l2_subdev_info imx134_subdev_info[] = {
 static struct msm_camera_i2c_conf_array imx134_init_conf[] = {
 	{&imx134_recommend_settings[0],
 	ARRAY_SIZE(imx134_recommend_settings), 0, MSM_CAMERA_I2C_BYTE_DATA},
-//S  JackBB 2012/12/3 [Q111M]
-//   {&imx134_LSCTable_settings[0],
-//   ARRAY_SIZE(imx134_LSCTable_settings), 0, MSM_CAMERA_I2C_BYTE_DATA}
-//E  JackBB 2012/12/3 [Q111M]
 };
 
 static struct msm_camera_i2c_conf_array imx134_confs[] = {
@@ -1756,14 +1719,9 @@ static struct msm_camera_i2c_conf_array imx134_confs[] = {
 	ARRAY_SIZE(imx134_120fps_settings), 0, MSM_CAMERA_I2C_BYTE_DATA},
 };
 
-/*B:20121103*/
 static struct msm_camera_i2c_conf_array imx134b_init_conf[] = {
 	{&imx134b_recommend_settings[0],
 	ARRAY_SIZE(imx134b_recommend_settings), 0, MSM_CAMERA_I2C_BYTE_DATA},
-//S  JackBB 2012/12/3 [Q111M]
-//   {&imx134_LSCTable_settings[0],
-//   ARRAY_SIZE(imx134_LSCTable_settings), 0, MSM_CAMERA_I2C_BYTE_DATA}
-//E  JackBB 2012/12/3 [Q111M]
 };
 
 static struct msm_camera_i2c_conf_array imx134b_confs[] = {
@@ -1774,7 +1732,6 @@ static struct msm_camera_i2c_conf_array imx134b_confs[] = {
 	{&imx134b_hdr_video_settings[0],
 	ARRAY_SIZE(imx134b_hdr_video_settings), 0, MSM_CAMERA_I2C_BYTE_DATA},
 };
-/*E:20121103*/
 
 static struct msm_sensor_output_info_t imx134_dimensions[] = {
 	{
@@ -1793,10 +1750,8 @@ static struct msm_sensor_output_info_t imx134_dimensions[] = {
 		.y_output = 0x04D0, /* 1232 */
 		.line_length_pclk = 0x0E10, /* 3600 */
 		.frame_length_lines = 0x0B90, /* 2960 */
-		/*B:20120821*/
 		.vt_pixel_clk = 320000000,
-		.op_pixel_clk = 320000000,//20121221
-		/*E:20120821*/
+		.op_pixel_clk = 320000000,
 		.binning_factor = 1,
 	},
 	{
@@ -1805,10 +1760,8 @@ static struct msm_sensor_output_info_t imx134_dimensions[] = {
 		.y_output = 0x04D0, /* 1232 */
 		.line_length_pclk = 0x0E10, /* 3600 */
 		.frame_length_lines = 0x0B90, /* 2960 */
-		/*B:20120821*/
 		.vt_pixel_clk = 320000000,
-		.op_pixel_clk = 320000000,//20121221
-		/*E:20120821*/
+		.op_pixel_clk = 320000000,
 		.binning_factor = 1,
 	},
 	{
@@ -1817,10 +1770,8 @@ static struct msm_sensor_output_info_t imx134_dimensions[] = {
 		.y_output = 0x0268, /* 616 */
 		.line_length_pclk = 0x0E10, /* 3600 */
 		.frame_length_lines = 0x02E4, /* 740 */
-		/*B:20120821*/
 		.vt_pixel_clk = 320000000,
-		.op_pixel_clk = 320000000,//20121221
-		/*E:20120821*/
+		.op_pixel_clk = 320000000,
 		.binning_factor = 1,
 	},
 	{
@@ -1829,15 +1780,12 @@ static struct msm_sensor_output_info_t imx134_dimensions[] = {
 		.y_output = 0x0268, /* 616 */
 		.line_length_pclk = 0x0E10, /* 3600 */
 		.frame_length_lines = 0x02E4, /* 740 */
-		/*B:20120821*/
 		.vt_pixel_clk = 320000000,
-		.op_pixel_clk = 320000000,//20121221
-		/*E:20120821*/
+		.op_pixel_clk = 320000000,
 		.binning_factor = 1,
 	},
 };
 
-/*B:20121103*/
 static struct msm_sensor_output_info_t imx134b_dimensions[] = {
 	{
 	/* full size - snapshot*/
@@ -1855,10 +1803,8 @@ static struct msm_sensor_output_info_t imx134b_dimensions[] = {
 		.y_output = 0x04D0, /* 1232 */
 		.line_length_pclk = 0x0E10, /* 3600 */
 		.frame_length_lines = 0x0AD2, /* 2770 */
-		/*B:20120821*/
 		.vt_pixel_clk = 300000000,
-		.op_pixel_clk = 300000000,//20121221
-		/*E:20120821*/
+		.op_pixel_clk = 300000000,
 		.binning_factor = 1,
 	},
 	{
@@ -1867,10 +1813,8 @@ static struct msm_sensor_output_info_t imx134b_dimensions[] = {
 		.y_output = 0x04D0, /* 1232 */
 		.line_length_pclk = 0x0E10, /* 3600 */
 		.frame_length_lines = 0x0AD2, /* 2770 */
-		/*B:20120821*/
 		.vt_pixel_clk = 300000000,
-		.op_pixel_clk = 300000000,//20121221
-		/*E:20120821*/
+		.op_pixel_clk = 300000000,
 		.binning_factor = 1,
 	},
 	// No need support following 2 modes
@@ -1880,10 +1824,8 @@ static struct msm_sensor_output_info_t imx134b_dimensions[] = {
 		.y_output = 0x0268, /* 616 */
 		.line_length_pclk = 0x0E10, /* 3600 */
 		.frame_length_lines = 0x02E4, /* 740 */
-		/*B:20120821*/
 		.vt_pixel_clk = 320000000,
-		.op_pixel_clk = 320000000,//20121221
-		/*E:20120821*/
+		.op_pixel_clk = 320000000,
 		.binning_factor = 1,
 	},
 	{
@@ -1892,14 +1834,11 @@ static struct msm_sensor_output_info_t imx134b_dimensions[] = {
 		.y_output = 0x0268, /* 616 */
 		.line_length_pclk = 0x0E10, /* 3600 */
 		.frame_length_lines = 0x02E4, /* 740 */
-		/*B:20120821*/
 		.vt_pixel_clk = 320000000,
-		.op_pixel_clk = 320000000,//20121221
-		/*E:20120821*/
+		.op_pixel_clk = 320000000,
 		.binning_factor = 1,
 	},
 };
-/*E:20121103*/
 
 #if 0 //remove to user space for bsp1744s
 static struct msm_camera_csid_vc_cfg imx134_cid_cfg[] = {
@@ -1943,12 +1882,11 @@ static struct msm_sensor_id_info_t imx134_id_info = {
 	.sensor_id_reg_addr = 0x0016,
 	.sensor_id = 0x134,// come from 134 sample
 };
-/*B:20121103*/
+
 static struct msm_sensor_id_info_t imx134b_id_info = {
 	.sensor_id_reg_addr = 0x3B2C,
 	.sensor_id = 0x00,// 0x80 ,0xA0 for imx134 bayer sensor, 0x00 for RGBW sensor
 };
-/*E:20121103*/
 
 static struct msm_sensor_exp_gain_info_t imx134_exp_gain_info = {
 	.coarse_int_time_addr = 0x0202,
@@ -1973,15 +1911,13 @@ static struct msm_camera_i2c_client imx134_sensor_i2c_client = {
 	.addr_type = MSM_CAMERA_I2C_WORD_ADDR,
 };
 
-/*S JackBB 2012/11/13  */
 #define PAGE_NUMBER 35
 static int imx134_write_proc(struct file *file, const char *buffer,
 					unsigned long count, void *data)
 {
 	int *buf;
-    int i,addr;
+	int i,addr;
 
-    //printk(KERN_NOTICE "imx134_write_proc(%d)",(int)count);
 	if (count < 1)
 		return -EINVAL;
 
@@ -1999,43 +1935,33 @@ static int imx134_write_proc(struct file *file, const char *buffer,
 
     for(i = 0;i < PAGE_NUMBER;i++)
     {
-        //printk(KERN_NOTICE "imx134_write_proc [%x]=%x",addr,buf[i] >> 8);
 	    msm_camera_i2c_write(&imx134_sensor_i2c_client,addr, buf[i] >> 8, MSM_CAMERA_I2C_BYTE_DATA);
         addr++;
         
-        //printk(KERN_NOTICE "imx134_write_proc [%x]=%x",addr,buf[i] & 0x00FF);
 	    msm_camera_i2c_write(&imx134_sensor_i2c_client,addr, buf[i] & 0x00FF, MSM_CAMERA_I2C_BYTE_DATA);
         addr++;
 
-        //printk(KERN_NOTICE "imx134_write_proc [%x]=%x",addr,buf[i+PAGE_NUMBER] >> 8);
 	    msm_camera_i2c_write(&imx134_sensor_i2c_client,addr, buf[i+PAGE_NUMBER] >> 8, MSM_CAMERA_I2C_BYTE_DATA);
         addr++;
 
-        //printk(KERN_NOTICE "imx134_write_proc [%x]=%x",addr,buf[i+PAGE_NUMBER] & 0x00FF);
 	    msm_camera_i2c_write(&imx134_sensor_i2c_client,addr, buf[i+PAGE_NUMBER] & 0x00FF, MSM_CAMERA_I2C_BYTE_DATA);
         addr++;
     }
 
     for(i = 0;i < PAGE_NUMBER;i++)
     {
-        //printk(KERN_NOTICE "imx134_write_proc [%x]=%x",addr,buf[i+PAGE_NUMBER*2] >> 8);
 	    msm_camera_i2c_write(&imx134_sensor_i2c_client,addr, buf[i+PAGE_NUMBER*2] >> 8, MSM_CAMERA_I2C_BYTE_DATA);
         addr++;
         
-        //printk(KERN_NOTICE "imx134_write_proc [%x]=%x",addr,buf[i+PAGE_NUMBER*2] & 0x00FF);
 	    msm_camera_i2c_write(&imx134_sensor_i2c_client,addr, buf[i+PAGE_NUMBER*2] & 0x00FF, MSM_CAMERA_I2C_BYTE_DATA);
         addr++;
 
-        //printk(KERN_NOTICE "imx134_write_proc [%x]=%x",addr,buf[i+PAGE_NUMBER*3] >> 8);
 	    msm_camera_i2c_write(&imx134_sensor_i2c_client,addr, buf[i+PAGE_NUMBER*3] >> 8, MSM_CAMERA_I2C_BYTE_DATA);
         addr++;
 
-        //printk(KERN_NOTICE "imx134_write_proc [%x]=%x",addr,buf[i+PAGE_NUMBER*3] & 0x00FF);
 	    msm_camera_i2c_write(&imx134_sensor_i2c_client,addr, buf[i+PAGE_NUMBER*3] & 0x00FF, MSM_CAMERA_I2C_BYTE_DATA);
         addr++;
     }
-
-    //printk(KERN_NOTICE "imx134_write_proc addr = %x",addr);
 
     msm_camera_i2c_write(&imx134_sensor_i2c_client,0x3A63, 0x01, MSM_CAMERA_I2C_BYTE_DATA);//RAM_SEL_Toggle
 
@@ -2062,7 +1988,6 @@ static int imx134_create_proc(void)
 
 	return -1;
 }
-/*E JackBB 2012/11/13 */
 
 
 static int __init imx134_sensor_init_module(void)
@@ -2074,11 +1999,9 @@ static int __init imx134_sensor_init_module(void)
 	return i2c_add_driver(&imx134_i2c_driver);
 }
 
-/*S Jim Lai 20120925 */
 int32_t imx134_sensor_write_wb_gain(struct msm_sensor_ctrl_t *s_ctrl,
 		uint16_t r_gain, uint16_t g_gain, uint16_t b_gain)
 {
-	// pr_err("%s: %d, r=%x g=%x b=%x\n", __func__, __LINE__, r_gain, g_gain, b_gain);
 	
 	s_ctrl->func_tbl->sensor_group_hold_on(s_ctrl);
 	msm_camera_i2c_write(s_ctrl->sensor_i2c_client,0x0712, g_gain >> 8, MSM_CAMERA_I2C_BYTE_DATA);
@@ -2092,9 +2015,8 @@ int32_t imx134_sensor_write_wb_gain(struct msm_sensor_ctrl_t *s_ctrl,
 	s_ctrl->func_tbl->sensor_group_hold_off(s_ctrl);
 	return 0;
 }
-/*E: Jim Lai 20120925 */
 
-/*S: Jim Lai 20121019 */
+
 int32_t imx134_sensor_get_stats_data(struct msm_sensor_ctrl_t *s_ctrl,
 		struct stats_data_t *stats_data)
 {
@@ -2102,19 +2024,15 @@ int32_t imx134_sensor_get_stats_data(struct msm_sensor_ctrl_t *s_ctrl,
 	for (i = 0; i < MAX_IMX134_AE_REGION/2; i++) {
 		rc = msm_camera_i2c_read_seq(
 			s_ctrl->sensor_i2c_client, 0x5000+(i*8), &stats_data->imx134_ae_stats[i*2], 2);
-//		pr_err("[%d]=%X %X\n", i*2, stats_data->imx134_ae_stats[i*2], stats_data->imx134_ae_stats[(i*2)+1]);
 	}
-
 	return rc;
 }
-/*E: Jim Lai 20121019 */
 
 
-/*S JackBB 2012/10/24 */
+
+
 int32_t imx134_sensor_write_atr_control(struct msm_sensor_ctrl_t *s_ctrl,uint16_t controlvar)
 {
-	//pr_err("%s: ctrl=%d\n", __func__, controlvar);
-	
 	s_ctrl->func_tbl->sensor_group_hold_on(s_ctrl);
     if(controlvar == 2)
     {
@@ -2129,8 +2047,7 @@ int32_t imx134_sensor_write_atr_control(struct msm_sensor_ctrl_t *s_ctrl,uint16_
 	s_ctrl->func_tbl->sensor_group_hold_off(s_ctrl);
 	return 0;
 }
-/*E JackBB 2012/10/24 */
-/*S:Jim Lai 20121108 */
+
 int32_t imx134_sensor_write_exp_gain1(struct msm_sensor_ctrl_t *s_ctrl,
 		uint16_t gain, uint32_t line)
 {
@@ -2157,7 +2074,6 @@ int32_t imx134_sensor_write_exp_gain1(struct msm_sensor_ctrl_t *s_ctrl,
 		s_ctrl->sensor_exp_gain_info->global_gain_addr, gain,
 		MSM_CAMERA_I2C_BYTE_DATA);
 
-//	pr_err("%s: %d, gain=%d line=%d res=%d\n", __func__, __LINE__, gain, line, s_ctrl->curr_res);
 	if (s_ctrl->curr_res == 2)
 	{
 		
@@ -2183,7 +2099,6 @@ int32_t imx134_sensor_write_exp_gain1(struct msm_sensor_ctrl_t *s_ctrl,
 	s_ctrl->func_tbl->sensor_group_hold_off(s_ctrl);
 	return 0;
 }
-/*E: Jim Lai 20121108 */
 static struct v4l2_subdev_core_ops imx134_subdev_core_ops = {
 	.ioctl = msm_sensor_subdev_ioctl,
 	.s_power = msm_sensor_power,
@@ -2198,7 +2113,6 @@ static struct v4l2_subdev_ops imx134_subdev_ops = {
 	.video  = &imx134_subdev_video_ops,
 };
 
-/*B:20121103*/
 static struct msm_sensor_reg_t imx134b_regs = {
 	.default_data_type = MSM_CAMERA_I2C_BYTE_DATA,
 	.start_stream_conf = imx134_start_settings,
@@ -2214,10 +2128,8 @@ static struct msm_sensor_reg_t imx134b_regs = {
 	.mode_settings = &imx134b_confs[0],
 	.output_settings = &imx134b_dimensions[0],
 	.num_conf = ARRAY_SIZE(imx134b_confs),
-	//B 2012/12/19
 	.flash_settings = imx134_flash_settings,
 	.flash_settings_size = ARRAY_SIZE(imx134_flash_settings),
-    //E 2012/12/19
 };
 
 int32_t imx134_sensor_match_id(struct msm_sensor_ctrl_t *s_ctrl)
@@ -2306,9 +2218,7 @@ int32_t imx134_sensor_match_id(struct msm_sensor_ctrl_t *s_ctrl)
     }
     return rc;
 }
-/*E:20121103*/
 
-// Luke 0701
 int32_t imx134_sensor_write_digital_gain(struct msm_sensor_ctrl_t *s_ctrl, uint16_t upper_byte, uint16_t lower_byte);
 int32_t imx134_sensor_write_digital_gain(struct msm_sensor_ctrl_t *s_ctrl, uint16_t upper_byte, uint16_t lower_byte)
 {
@@ -2323,7 +2233,6 @@ int32_t imx134_sensor_write_digital_gain(struct msm_sensor_ctrl_t *s_ctrl, uint1
 }
 
 
-//S  JackBB 2012/12/3 [Q111M]
 int32_t imx134_write_exp_gain(struct msm_sensor_ctrl_t *s_ctrl,
                uint16_t gain, uint32_t line, int32_t luma_info, uint16_t fgain)
 {
@@ -2335,16 +2244,11 @@ int32_t imx134_write_exp_gain(struct msm_sensor_ctrl_t *s_ctrl,
 
        uint16_t atr_out_noise = 0;
        uint16_t atr_out_mid = 0;
-       //float tc_gain;
        static uint16_t deadzone_tolerence = 0;
-
-       //uint32_t atr_threshold = 50;
-       //uint32_t min_atr_threshold = 5;//Jackbb 2012/12/20
 
        int32_t luma_avg, AvgYmaxStat, AvgYminStat;
        uint16_t debug_luma_avg, debug_luma_min, debug_luma_max;
        uint8_t debug_luma_select;
-       // Luke 0701 -->
        uint16_t digital_gain, digital_gain_mod;
 
        digital_gain = 1;
@@ -2363,7 +2267,6 @@ int32_t imx134_write_exp_gain(struct msm_sensor_ctrl_t *s_ctrl,
 	    }
 	    gain = 224;
 	}
-       // Luke 0701 <--   
        luma_avg = luma_info & 0xFF;
        AvgYminStat = (luma_info & 0x7FF00) >> 8;
        AvgYmaxStat = (luma_info & 0x7FF00000) >> 20;
@@ -2371,15 +2274,13 @@ int32_t imx134_write_exp_gain(struct msm_sensor_ctrl_t *s_ctrl,
         fl_lines = s_ctrl->curr_frame_length_lines;
         fl_lines = (fl_lines * s_ctrl->fps_divider) / Q10;
         offset = s_ctrl->sensor_exp_gain_info->vert_offset;
-#if 0 //20130221
+#if 0
         if (line <= 24)
            line = 24;
 #endif
         if (line > (fl_lines - offset))
                 fl_lines = line + offset;
 
-       //pr_info("imx134_write_exp_gain: line: %d gain: %d luma_avg:%d",line,gain,luma_avg);
-       //pr_info("lokesh: imx134_write_exp_gain: luma_avg: %d YminStat: %d YMaxStat: %d",luma_avg,AvgYminStat,AvgYmaxStat);
         s_ctrl->func_tbl->sensor_group_hold_on(s_ctrl);
         msm_camera_i2c_write(s_ctrl->sensor_i2c_client,
                 s_ctrl->sensor_output_reg_addr->frame_length_lines, fl_lines,
@@ -2411,8 +2312,6 @@ int32_t imx134_write_exp_gain(struct msm_sensor_ctrl_t *s_ctrl,
                  if(debug_luma_avg <= debug_luma_min)
                          debug_luma_avg = debug_luma_min + 1;
 
-                 //CDBG("debug_luma_avg=%d,debug_luma_min=%d,debug_luma_max=%d,debug_luma_select=%d"
-                    //,debug_luma_avg,debug_luma_min,debug_luma_max,debug_luma_select);
                   msm_camera_i2c_write(s_ctrl->sensor_i2c_client,
                        DEBUG_AVG_BYTE_ADDR, debug_luma_avg,
                        MSM_CAMERA_I2C_WORD_DATA);
@@ -2461,30 +2360,23 @@ int32_t imx134_write_exp_gain(struct msm_sensor_ctrl_t *s_ctrl,
                      SHORT_GAIN_BYTE_ADDR, shortshutter_gain,
                      MSM_CAMERA_I2C_BYTE_DATA);
 
-              //pr_info("lokesh: longtshutter =%d, shortshutter=%d, longgain =%d\n",line, shortshutter, gain);
               msm_camera_i2c_write(s_ctrl->sensor_i2c_client,
                      SHORT_SHUTTER_WORD_ADDR, shortshutter,
                      MSM_CAMERA_I2C_WORD_DATA);
 
               /* Adaptive tone curve parameters update */
               if (luma_avg < THRESHOLD_DEAD_ZONE + deadzone_tolerence) {
-                    //CDBG("lokesh: am in Deadzone tol: %d --> 5",deadzone_tolerence);//bbtest
                     deadzone_tolerence = 2;
                      /* change to fixed tone curve */
                      msm_camera_i2c_write(s_ctrl->sensor_i2c_client,
                             TC_SWITCH_BYTE_ADDR, 0x01, MSM_CAMERA_I2C_BYTE_DATA);
               } else {
-//pr_err("lokesh: am Out of Deadzone tol: %d --> 0",deadzone_tolerence);
                     deadzone_tolerence = 0;
                      /* change to adaptive tone curve */
                      msm_camera_i2c_write(s_ctrl->sensor_i2c_client,
                             TC_SWITCH_BYTE_ADDR, 0x00, MSM_CAMERA_I2C_BYTE_DATA);
-// Luke 0701 -->
 #if 0
-                    /* if (luma_avg < THRESHOLD_0) {  lokesh: Here assuming th0 == th_deadzone
-                            atr_out_noise = 0;
-                            atr_out_mid = 0;
-                     } else*/ if (luma_avg < THRESHOLD_1) {
+              if (luma_avg < THRESHOLD_1) {
                             tc_gain = ((luma_avg - THRESHOLD_0)/(THRESHOLD_1 - THRESHOLD_0) * (1 - INIT_ATR_GAIN) + INIT_ATR_GAIN);
                             atr_out_noise = INIT_ATR_OUT_NOISE * tc_gain;
                             atr_out_mid = INIT_ATR_OUT_MID * tc_gain;
@@ -2492,8 +2384,6 @@ int32_t imx134_write_exp_gain(struct msm_sensor_ctrl_t *s_ctrl,
                             atr_out_noise = INIT_ATR_OUT_NOISE;
                             atr_out_mid = INIT_ATR_OUT_MID;
                      }
-                     //atr_out_noise += ATR_OFFSET;
-                     //atr_out_mid += ATR_OFFSET;
 #else					 
                     if(luma_avg >= 100 ) {
                             atr_out_noise = INIT_ATR_OUT_NOISE;
@@ -2505,8 +2395,6 @@ int32_t imx134_write_exp_gain(struct msm_sensor_ctrl_t *s_ctrl,
                             atr_out_mid = INIT_ATR_OUT_MID *  luma_avg / 100;
 			}
 #endif
-// Luke 0701 <--			 
-                     //CDBG("atr_out_noise=%d,atr_out_mid=%d",atr_out_noise,atr_out_mid);//bbtest
                      msm_camera_i2c_write(s_ctrl->sensor_i2c_client,
                             TC_OUT_NOISE_WORD_ADDR, atr_out_noise,
                             MSM_CAMERA_I2C_WORD_DATA);
@@ -2530,10 +2418,8 @@ int32_t imx134_write_exp_gain(struct msm_sensor_ctrl_t *s_ctrl,
                shortshutter = (line * fgain) / (Q8 * shortshutter_expratio);
                pr_err("longtshutter =%d, shortshutter=%d, longgain =%d\n", line, shortshutter, gain);
                msm_camera_i2c_write(s_ctrl->sensor_i2c_client,
-                       SHORT_SHUTTER_WORD_ADDR, shortshutter, MSM_CAMERA_I2C_WORD_DATA);
-			//S Jackbb 2012/12/20
+               SHORT_SHUTTER_WORD_ADDR, shortshutter, MSM_CAMERA_I2C_WORD_DATA);
          if (luma_avg > min_atr_threshold) {
-			//E Jackbb 2012/12/20
              uint32_t atr_offset = 0;
              uint16_t atr_out_noise = 0xA0;
              uint16_t atr_out_mid = 0x800;
@@ -2564,19 +2450,16 @@ int32_t imx134_write_exp_gain(struct msm_sensor_ctrl_t *s_ctrl,
                    msm_camera_i2c_write(s_ctrl->sensor_i2c_client,
                            TC_MID_BRATE_REGADDR, atr_mid_brate, MSM_CAMERA_I2C_BYTE_DATA);
          }
-		//S Jackbb 2012/12/20
          else 
          {
                pr_err("close ATR");
                msm_camera_i2c_write(s_ctrl->sensor_i2c_client,
                        TC_SWITCH_REGADDR, 0x01, MSM_CAMERA_I2C_BYTE_DATA);
          }
-			//E Jackbb 2012/12/20
        }
 #endif
         s_ctrl->func_tbl->sensor_group_hold_off(s_ctrl);
 
-        // Luke 0701 
         imx134_sensor_write_digital_gain(s_ctrl, digital_gain, digital_gain_mod);
 
         return 0;
@@ -2589,20 +2472,15 @@ int32_t imx134_hdr_update(struct msm_sensor_ctrl_t *s_ctrl,
 
        switch(update_parm->type) {
        case SENSOR_HDR_UPDATE_AWB:
-               //CDBG("%s: SENSOR_HDR_UPDATE_AWB\n",__func__);
                msm_camera_i2c_write(s_ctrl->sensor_i2c_client,
                        ABS_GAIN_R_WORD_ADDR, update_parm->awb_gain_r,
                        MSM_CAMERA_I2C_WORD_DATA);
                msm_camera_i2c_write(s_ctrl->sensor_i2c_client,
                        ABS_GAIN_B_WORD_ADDR, update_parm->awb_gain_b,
                        MSM_CAMERA_I2C_WORD_DATA);
-               //CDBG("%s: awb gains updated r=0x%x, b=0x%x\n", __func__,
-                 //      update_parm->awb_gain_r,
-                   //    update_parm->awb_gain_b);
                break;
 
        case SENSOR_HDR_UPDATE_LSC:
-               //CDBG("%s: SENSOR_HDR_UPDATE_LSC\n",__func__);
                /* step1: write knot points to LSC table */
 #if 1
                msm_camera_i2c_write_seq(s_ctrl->sensor_i2c_client,
@@ -2625,7 +2503,6 @@ int32_t imx134_hdr_update(struct msm_sensor_ctrl_t *s_ctrl,
                msm_camera_i2c_write(s_ctrl->sensor_i2c_client,
                        RAM_SEL_TOGGLE_BYTE_ADDR, 0x01, MSM_CAMERA_I2C_BYTE_DATA);
 
-               //CDBG("%s: lsc table updated\n", __func__);
                break;
                 
        default:
@@ -2635,7 +2512,6 @@ int32_t imx134_hdr_update(struct msm_sensor_ctrl_t *s_ctrl,
        }
        return 0;
 }
-//E  JackBB 2012/12/3 [Q111M]
 
 static struct msm_sensor_fn_t imx134_func_tbl = {
 	.sensor_start_stream = msm_sensor_start_stream,
@@ -2643,34 +2519,22 @@ static struct msm_sensor_fn_t imx134_func_tbl = {
 	.sensor_group_hold_on = msm_sensor_group_hold_on,
 	.sensor_group_hold_off = msm_sensor_group_hold_off,
 	.sensor_set_fps = msm_sensor_set_fps,
-/*S:  Jim Lai 20121108 */
 	.sensor_write_exp_gain = imx134_write_exp_gain,
 	.sensor_write_snapshot_exp_gain = imx134_write_exp_gain,
-/*E:  Jim Lai 20121108 */
-/*S:  Jim Lai 20120925 */
 	.sensor_write_wb_gain = imx134_sensor_write_wb_gain,
-/*E:  Jim Lai 20120925 */
 	.sensor_setting = msm_sensor_setting,
 	.sensor_set_sensor_mode = msm_sensor_set_sensor_mode,
 	.sensor_mode_init = msm_sensor_mode_init,
 	.sensor_get_output_info = msm_sensor_get_output_info,
-	/*S:Jim Lai 20121019 */
 	.sensor_get_stats_data = imx134_sensor_get_stats_data,
-	/*E:Jim Lai 20121019 */
 	.sensor_config = msm_sensor_config,
 	.sensor_power_up = msm_sensor_power_up,
 	.sensor_power_down = msm_sensor_power_down,
 	.sensor_adjust_frame_lines = msm_sensor_adjust_frame_lines1,
 	.sensor_get_csi_params = msm_sensor_get_csi_params,
-    /*S  JackBB 2012/10/24  */
-    .sensor_write_atr_control = imx134_sensor_write_atr_control,
-    /*E  JackBB 2012/10/24 */
-    //S  JackBB 2012/12/3 [Q111M]
-    .sensor_hdr_update = imx134_hdr_update,
-    //E  JackBB 2012/12/3 [Q111M]
-    /*B:20121103*/
-    .sensor_match_id = imx134_sensor_match_id,
-    /*E:20121103*/
+	.sensor_write_atr_control = imx134_sensor_write_atr_control,
+	.sensor_hdr_update = imx134_hdr_update,
+	.sensor_match_id = imx134_sensor_match_id,
 };
 
 static struct msm_sensor_reg_t imx134_regs = {
@@ -2688,10 +2552,8 @@ static struct msm_sensor_reg_t imx134_regs = {
 	.mode_settings = &imx134_confs[0],
 	.output_settings = &imx134_dimensions[0],
 	.num_conf = ARRAY_SIZE(imx134_confs),
-        //B 2012/11/06
 	.flash_settings = imx134_flash_settings,
 	.flash_settings_size = ARRAY_SIZE(imx134_flash_settings),
-        //E 2012/11/06
 };
 
 static struct msm_sensor_ctrl_t imx134_s_ctrl = {
@@ -2702,7 +2564,6 @@ static struct msm_sensor_ctrl_t imx134_s_ctrl = {
 	.sensor_id_info = &imx134_id_info,
 	.sensor_exp_gain_info = &imx134_exp_gain_info,
 	.cam_mode = MSM_SENSOR_MODE_INVALID,
-	//.csi_params = &imx134_csi_params_array[0],
 	.msm_sensor_mutex = &imx134_mut,
 	.sensor_i2c_driver = &imx134_i2c_driver,
 	.sensor_v4l2_subdev_info = imx134_subdev_info,

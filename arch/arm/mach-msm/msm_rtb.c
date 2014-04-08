@@ -207,7 +207,8 @@ int uncached_logk_pc(enum logk_event_type log_type, void *caller,
 				void *data)
 {
 	int i;
-#ifdef CCI_KLOG_ALLOW_FORCE_PANIC 
+#ifdef CCI_KLOG_ALLOW_FORCE_PANIC
+
 	if (!msm_rtb_event_should_log(log_type))
 		return 0;
 

@@ -14,14 +14,12 @@
 #include <linux/interrupt.h>
 #include <linux/mfd/pm8xxx/pm8038.h>
 #include <linux/mfd/pm8xxx/pm8xxx-adc.h>
+#include <linux/mfd/pm8xxx/vibrator.h>
 #include <linux/msm_ssbi.h>
 #include <asm/mach-types.h>
 #include <mach/msm_bus_board.h>
 #include <mach/restart.h>
 #include <mach/socinfo.h>
-
-#include <linux/mfd/pm8xxx/vibrator.h>
-
 #include "devices.h"
 #include "board-8930.h"
 
@@ -314,7 +312,6 @@ static struct pm8xxx_pwrkey_platform_data pm8xxx_pwrkey_pdata = {
 static struct pm8xxx_vibrator_platform_data pm8xxx_vib_pdata = {
 	.initial_vibrate_ms  = 500,
 	.level_mV = 3000,
-	//.max_timeout_ms = 15000,
 	.max_timeout_ms =300000,
 };
 
@@ -325,7 +322,7 @@ static int pm8921_therm_mitigation[] = {
 	325,
 };
 
-#ifdef ORG_VER //S:LO
+#ifdef ORG_VER
 #define MAX_VOLTAGE_MV		4200
 #define CHG_TERM_MA		100
 static struct pm8921_charger_platform_data pm8921_chg_pdata __devinitdata = {
@@ -374,15 +371,15 @@ static struct pm8921_charger_platform_data pm8921_chg_pdata __devinitdata = {
 	.warm_bat_chg_current	= 400,
 	.cool_bat_voltage	= 4000,
 	.warm_bat_voltage	= 4000,
-	.cold_thr               = 0, // cold = 1 80%   clod = 0 70%
-	.hot_thr                = 1, // hot  = 0 25%   hot  = 1 35%
+	.cold_thr               = 0,
+	.hot_thr                = 1,
 	.thermal_mitigation	= pm8921_therm_mitigation,
 	.thermal_levels		= ARRAY_SIZE(pm8921_therm_mitigation),
 	.led_src_config		= LED_SRC_VPH_PWR,
 	.rconn_mohm		= 10,
 	.chg_time_out_extra     = 329280000, // 329280000 = 5488mins x 60 x 1000
 };
-#endif//E:LO
+#endif
 
 static struct pm8xxx_vibrator_platform_data pm8038_vib_pdata = {
 	.initial_vibrate_ms = 500,
@@ -390,8 +387,7 @@ static struct pm8xxx_vibrator_platform_data pm8038_vib_pdata = {
 	.max_timeout_ms = 15000,
 };
 
-//#define PM8038_WLED_MAX_CURRENT		25
-#define PM8038_WLED_MAX_CURRENT		20 //Taylor--20120821
+#define PM8038_WLED_MAX_CURRENT		20
 #define PM8XXX_LED_PWM_PERIOD		1000
 #define PM8XXX_LED_PWM_DUTY_MS		20
 #define PM8038_RGB_LED_MAX_CURRENT	12
@@ -469,7 +465,6 @@ static struct pm8xxx_led_config pm8038_led_configs[] = {
 		.max_current = PM8038_RGB_LED_MAX_CURRENT,
 		.pwm_channel = 5,
 		.pwm_period_us = PM8XXX_LED_PWM_PERIOD,
-		//.pwm_duty_cycles = &pm8038_led0_pwm_duty_cycles,
 	},
 	[2] = {
 		.id = PM8XXX_ID_RGB_LED_GREEN,
@@ -477,7 +472,6 @@ static struct pm8xxx_led_config pm8038_led_configs[] = {
 		.max_current = PM8038_RGB_LED_MAX_CURRENT,
 		.pwm_channel = 4,
 		.pwm_period_us = PM8XXX_LED_PWM_PERIOD,
-		//.pwm_duty_cycles = &pm8038_led0_pwm_duty_cycles,
 	},
 	[3] = {
 		.id = PM8XXX_ID_RGB_LED_BLUE,
@@ -485,7 +479,6 @@ static struct pm8xxx_led_config pm8038_led_configs[] = {
 		.max_current = PM8038_RGB_LED_MAX_CURRENT,
 		.pwm_channel = 3,
 		.pwm_period_us = PM8XXX_LED_PWM_PERIOD,
-		//.pwm_duty_cycles = &pm8038_led0_pwm_duty_cycles,
 	},
 };
 
@@ -512,7 +505,7 @@ static struct pm8xxx_misc_platform_data pm8xxx_misc_pdata = {
 
 static struct pm8xxx_spk_platform_data pm8xxx_spk_pdata = {
 	.spk_add_enable		= false,
-	.cd_ng_threshold	= 0x0,  // BAM_S C 130530 [Mig:I2f3e3935]
+	.cd_ng_threshold	= 0x0,
 	.cd_nf_preamp_bias	= 0x1,
 	.cd_ng_hold		= 0x6,
 	.cd_ng_max_atten	= 0x0,
@@ -522,7 +515,7 @@ static struct pm8xxx_spk_platform_data pm8xxx_spk_pdata = {
 	.cd_delay		= 0x0,
 };
 
-#ifdef ORG_VER//S:LO
+#ifdef ORG_VER
 static struct pm8921_bms_platform_data pm8921_bms_pdata __devinitdata = {
 	.battery_type			= BATT_UNKNOWN,
 	.r_sense_uohm			= 10000,
@@ -562,7 +555,7 @@ static struct pm8921_bms_platform_data pm8921_bms_pdata __devinitdata = {
 	.low_ocv_correction_limit_uv	= 100,
 	.hold_soc_est			= 1,
 };
-#endif//E:LO
+#endif
 
 static struct pm8038_platform_data pm8038_platform_data __devinitdata = {
 	.irq_pdata		= &pm8xxx_irq_pdata,
@@ -570,9 +563,7 @@ static struct pm8038_platform_data pm8038_platform_data __devinitdata = {
 	.mpp_pdata		= &pm8xxx_mpp_pdata,
 	.rtc_pdata              = &pm8xxx_rtc_pdata,
 	.pwrkey_pdata		= &pm8xxx_pwrkey_pdata,
-
 	.vib_pdata              = &pm8xxx_vib_pdata,
-
 	.misc_pdata		= &pm8xxx_misc_pdata,
 	.regulator_pdatas	= msm8930_pm8038_regulator_pdata,
 	.charger_pdata		= &pm8921_chg_pdata,

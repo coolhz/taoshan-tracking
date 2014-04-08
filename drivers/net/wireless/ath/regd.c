@@ -528,6 +528,8 @@ ath_regd_init_wiphy(struct ath_regulatory *reg,
 		 */
 		regd = ath_default_world_regdomain();
 	}
+
+
 	wiphy_apply_custom_regulatory(wiphy, regd);
 	ath_reg_apply_radar_flags(wiphy);
 	ath_reg_apply_world_flags(wiphy, NL80211_REGDOM_SET_BY_DRIVER, reg);

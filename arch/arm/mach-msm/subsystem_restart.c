@@ -1,5 +1,5 @@
 /* Copyright (c) 2011-2012, The Linux Foundation. All rights reserved.
- * Copyright (C) 2012 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -54,7 +54,7 @@ extern void *restart_reason;
 
 #ifdef CONFIG_CCI_KLOG
 #include <linux/cciklog.h>
-#endif // #ifdef CONFIG_CCI_KLOG
+#endif
 
 
 struct subsys_soc_restart_order {
@@ -550,9 +550,9 @@ int subsystem_restart_dev(struct subsys_device *dev)
 //modem fatal error
 #if CCI_KLOG_CRASH_SIZE
 	set_fault_state(0x5, restart_level, name);
-#endif // #if CCI_KLOG_CRASH_SIZE
+#endif
 	cklc_save_magic(KLOG_MAGIC_MARM_FATAL, KLOG_STATE_MARM_FATAL);
-#endif // #ifdef CONFIG_CCI_KLOG
+#endif
 
 
 	switch (restart_level) {

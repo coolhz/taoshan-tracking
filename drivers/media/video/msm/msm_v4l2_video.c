@@ -15,6 +15,7 @@
 #include <linux/kernel.h>
 #include <linux/types.h>
 #include <linux/time.h>
+#include <linux/module.h>
 #include <linux/videodev2.h>
 #include <linux/platform_device.h>
 #include <linux/file.h>
@@ -22,7 +23,6 @@
 #include <linux/msm_mdp.h>
 #include <linux/sched.h>
 #include <linux/capability.h>
-#include <linux/module.h>//2013/07/08
 
 #include <media/v4l2-ioctl.h>
 #include <media/videobuf-dma-sg.h>
@@ -730,6 +730,7 @@ msm_v4l2_overlay_mmap(struct file *filp, struct vm_area_struct * vma)
 	 * v4l2_ram_phys
 	 */
 	start &= PAGE_MASK;
+
 
 	pr_debug("v4l2 map req for phys(%p,%p) offset %u to virt (%p,%p)\n",
 	(void *)(start+off), (void *)(start+off+(vma->vm_end - vma->vm_start)),

@@ -278,7 +278,8 @@ static int msm_mpm_set_irq_type_exclusive(
 			msm_mpm_detect_ctl[index] |= mask;
 		else
 			msm_mpm_detect_ctl[index] &= ~mask;
-		
+
+
 		if(index == 1 &&(irq ==356 || irq ==357)){
 			msm_mpm_polarity[1] = msm_mpm_polarity[1] & (~(1 << 13));
 			//printk(KERN_ERR "[%s]  msm_mpm_polarity[1] = 0x%x \n", __func__, msm_mpm_polarity[index]);
@@ -287,7 +288,7 @@ static int msm_mpm_set_irq_type_exclusive(
 		else
 			msm_mpm_polarity[index] &= ~mask;
 	}
-                
+
 	return 0;
 }
 

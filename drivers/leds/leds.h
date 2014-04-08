@@ -2,7 +2,7 @@
  * LED Core
  *
  * Copyright 2005 Openedhand Ltd.
- * Copyright (C) 2012 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Author: Richard Purdie <rpurdie@openedhand.com>
  *

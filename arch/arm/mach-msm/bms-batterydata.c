@@ -165,6 +165,7 @@ static struct sf_lut rbatt_sf = {
 
         }
 };
+
 static struct pc_temp_ocv_lut pc_temp_ocv = {
 	.rows		= 29,
 	.cols		= 10,
@@ -207,20 +208,20 @@ static struct pc_temp_ocv_lut pc_temp_ocv = {
 #endif
 
 struct bms_battery_data palladium_1500_data = {
-        #ifdef ORG_VER
+    #ifdef ORG_VER
 	.fcc			= 1500,
 	.fcc_temp_lut		= &fcc_temp,
 	.pc_temp_ocv_lut	= &pc_temp_ocv,
 	.rbatt_sf_lut		= &rbatt_sf,
 	.default_rbatt_mohm	= 236,
 	.rbatt_capacitive_mohm	= 50,
-        #else
-        .fcc				= 1700,
-	.fcc_temp_lut		= &fcc_temp,
-	.fcc_sf_lut			= &fcc_sf,
-	.pc_temp_ocv_lut	= &pc_temp_ocv,
-        .rbatt_sf_lut		=&rbatt_sf,
-	.default_rbatt_mohm		=161,
-        .rbatt_capacitive_mohm	= 0,
-        #endif
+     #else
+    .fcc                     = 1700,
+    .fcc_temp_lut           = &fcc_temp,
+    .fcc_sf_lut             = &fcc_sf,
+    .pc_temp_ocv_lut        = &pc_temp_ocv,
+    .rbatt_sf_lut           =&rbatt_sf,
+    .default_rbatt_mohm     =161,
+    .rbatt_capacitive_mohm  = 0,
+    #endif
 };

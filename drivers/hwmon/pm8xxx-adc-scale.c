@@ -15,19 +15,18 @@
 #include <linux/err.h>
 #include <linux/module.h>
 #include <linux/mfd/pm8xxx/pm8xxx-adc.h>
-#if defined(ORG_VER)//S:YF
+#if defined(ORG_VER)
 #else
 #include <linux/fs.h>
 #include <linux/uaccess.h>
-#endif//E:YF
+#endif
 #define KELVINMIL_DEGMIL	273160
 
-#if defined(ORG_VER)//S:YF
+#if defined(ORG_VER)
 #else
 #define CONFIG_PM8038_CHG_DEBUG 0
 #if(CONFIG_PM8038_CHG_DEBUG)
     #define PrintLog_DEBUG(fmt, args...)    printk(KERN_INFO "CH(L)=> "pr_fmt(fmt), ##args)
-//    #define PrintLog_DEBUG(fmt, args...)    pr_debug("CH(L)=> "pr_fmt(fmt), ##args)
 #else
     #define PrintLog_DEBUG(fmt, args...)
 #endif
@@ -38,7 +37,7 @@
 #else
     #define PrintLog_INFO(fmt, args...)
 #endif
-#endif//E:YF
+#endif
 
 /* Units for temperature below (on x axis) is in 0.1DegC as
    required by the battery driver. Note the resolution used
@@ -675,7 +674,7 @@ static int64_t pm8xxx_adc_scale_ratiometric_calib(int32_t adc_code,
 	return adc_voltage;
 }
 
-#if defined(ORG_VER)//S:YF
+#if defined(ORG_VER)
 #else
 #define  NV_calibrated_btm_count 10
 bool btm_calibrate(const char *buf, size_t count)
@@ -720,10 +719,7 @@ bool btm_calibrate(const char *buf, size_t count)
 			}
 		}
 	}
-//	for (i=0; i<NV_calibrated_btm_count; i++)
-//	{
-//		PrintLog_DEBUG("btm_calibrated_index[%d]=%d\n", i, btm_calibrated_index[i]);
-//	}
+
 	for (i=0; i<NV_calibrated_btm_count; i++)
 	{
 		for (j=i; j<NV_calibrated_btm_count; j++)
@@ -736,10 +732,7 @@ bool btm_calibrate(const char *buf, size_t count)
 			}
 		}
 	}
-//	for (i=0; i<NV_calibrated_btm_count; i++)
-//	{
-//		PrintLog_DEBUG("btm_calibrated_index[%d]=%d\n", i, btm_calibrated_index[i]);
-//	}
+
 	for (i=0; i<NV_calibrated_btm_count; i++)
 	{
 		if(btm_calibrated_index[i] != -1)
@@ -768,7 +761,7 @@ bool btm_calibrate(const char *buf, size_t count)
 
 	return true;
 }
-#endif//E:YF
+#endif
 
 int32_t pm8xxx_adc_scale_batt_therm(int32_t adc_code,
 		const struct pm8xxx_adc_properties *adc_properties,

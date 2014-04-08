@@ -75,13 +75,12 @@
 #define WLED_OP_FDBCK_MASK		0x1C
 #define WLED_OP_FDBCK_BIT_SHFT		0x02
 
-#define WLED_MAX_LEVEL			255
 #define WLED_8_BIT_MASK			0xFF
 #define WLED_4_BIT_MASK			0x0F
 #define WLED_8_BIT_SHFT			0x08
-//#define WLED_MAX_DUTY_CYCLE		0xFFF
-#define WLED_MAX_DUTY_CYCLE		0xC00 //Taylor--20120821
 #define WLED_4_BIT_SHFT			0x04
+#define WLED_MAX_LEVEL			255
+#define WLED_MAX_DUTY_CYCLE		0xC00
 
 #define WLED_RESISTOR_COMPENSATION_DEFAULT	20
 #define WLED_RESISTOR_COMPENSATION_MAX	320
@@ -185,17 +184,7 @@ static int in1000out1500[50] = {
 	   47, 44, 40, 37, 34, 30, 27, 24, 
 	   20, 17, 14, 10,  7,  3,  0
 };
-/*
-static int in500out1000[50] = {
-		6, 13, 19, 25, 31, 38, 44, 
-	   50, 56, 63, 69, 75, 81, 88, 94, 100, 
-	   97, 94, 91, 88, 85, 82, 79, 76, 
-	   73, 70, 67, 64, 61, 58, 55, 52,
-	   49, 46, 43, 40, 37, 34, 31, 28,
-	   25, 22, 19, 16, 14, 12,	9,	6,
-	    3,  0
-};
-*/
+
 static int in800out1300[60] = {
 		4,	8, 12, 15, 20, 25, 30, 
 	   35, 40, 45, 50, 54, 58, 62, 66, 
@@ -216,39 +205,6 @@ static int in1500out3000[60] = {
 	   38, 35, 33, 30, 28, 25, 23, 20, 
 	   18, 15, 13, 10,	8,	5,	3,	0
 };
-/*
-static int in300out700[50] = {
-		6, 12, 18, 24, 30, 36, 42,
-	   48, 55, 62, 70, 78, 87, 93,
-	  100, 97, 94, 92, 90, 87, 85,
-	   83, 80, 77, 75, 73, 70, 68,
-	   65, 63, 60, 57, 54, 51, 48,
-	   45, 42, 39, 36, 33, 30, 27,
-	   24, 21, 18, 15, 11,  7,  3,
-	    0	   
-};
-static int in625out625[50] = {
-		0,	4,  8, 12, 16, 20, 24,
-	   28, 32, 36, 40, 44, 48, 52,
-	   56, 60, 64, 68, 72, 76, 80,
-	   85, 90, 95, 100, 96, 92, 88,
-	   84, 80, 76, 72, 68, 64, 60,
-	   56, 52, 48, 44, 40, 36, 32,
-	   28, 24, 20, 16, 12,  8,  4,
-	    0	   
-};
-static int in200out1900[60] = {
-	   15, 31, 48, 65, 82, 100,
-	   98, 96, 94, 92, 90, 88, 86,
-	   84, 82, 80, 78, 76, 74, 72,
-	   70, 68, 66, 64, 62, 60, 58,
-	   56, 54, 52, 50, 48, 46, 44,
-	   42, 40, 38, 36, 34, 32, 30,
-	   28, 26, 24, 22, 20, 18, 16,
-	   14, 12, 10,  9,  8,  7,  6,
-	    5,  4,  3,  2,  0
-};
-*/
 //fade-in 500 then continuous light
 static int in500[20] = {
 		5, 10, 15, 20, 25, 30, 35, 40, 45, 50,
@@ -564,10 +520,6 @@ static void pm8xxx_led_brightnesstest(struct led_classdev *led_cdev,
 
 	led = container_of(led_cdev, struct pm8xxx_led_data, cdev);
 
-	//if (value < LED_OFF || value > led->cdev.max_brightness) {
-	//	dev_err(led->cdev.dev, "Invalid brightness value exceeds");
-	//	return;
-	//}
 	led->cdev.ccitest_brightness = testvalue;
 	schedule_work(&led->testwork);
 }
@@ -689,10 +641,6 @@ static void pm8xxx_led_modeset(struct led_classdev *led_cdev,
 
 	led = container_of(led_cdev, struct pm8xxx_led_data, cdev);
 
-	//if (value < LED_OFF || value > led->cdev.max_brightness) {
-	//	dev_err(led->cdev.dev, "Invalid brightness value exceeds");
-	//	return;
-	//}
 	led->cdev.ccimode = modevalue;
 	schedule_work(&led->modework);
 }
@@ -2629,15 +2577,14 @@ static int __devinit pm8xxx_led_probe(struct platform_device *pdev)
 		}
 
 		/* configure default state */
-		if (led_cfg->default_state) {//Taylor--20120907-->B
+		if (led_cfg->default_state) {
 			if (led_cfg->mode == PM8XXX_LED_MODE_MANUAL) {
-				led_dat->cdev.brightness = led_dat->cdev.max_brightness/3;
+			led_dat->cdev.brightness = led_dat->cdev.max_brightness/3;
 			}
-			else
-				led_dat->cdev.brightness = led_dat->cdev.max_brightness;
-
-		}//<--E
 		else
+			led_dat->cdev.brightness = led_dat->cdev.max_brightness;
+
+		} else
 			led_dat->cdev.brightness = LED_OFF;
 
 		if (led_cfg->mode != PM8XXX_LED_MODE_MANUAL) {

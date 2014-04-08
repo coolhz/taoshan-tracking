@@ -130,7 +130,6 @@
 #define CONFIG_PM8038_CHG_DEBUG 0
 #if(CONFIG_PM8038_CHG_DEBUG)
     #define PrintLog_DEBUG(fmt, args...)    printk(KERN_INFO "CH(L)=> "pr_fmt(fmt), ##args)
-//    #define PrintLog_DEBUG(fmt, args...)    pr_debug("CH(L)=> "pr_fmt(fmt), ##args)
 #else
     #define PrintLog_DEBUG(fmt, args...)
 #endif
@@ -219,7 +218,7 @@ static struct pm8xxx_mpp_config_data pm8xxx_adc_mpp_unconfig = {
 static bool pm8xxx_adc_calib_first_adc;
 static bool pm8xxx_adc_initialized, pm8xxx_adc_calib_device_init;
 
-#if defined(ORG_VER)//S:YF
+#if defined(ORG_VER)
 #else
 extern bool btm_calibrate(const char *buf, size_t count);
 extern bool pm8921_adc_btm_reconfigure(void);
@@ -227,7 +226,6 @@ static int CalibrateBTM = 0;
 #define NV_BTM_SIZE 80
 static ssize_t CalibrateBTM_show(struct device *dev, struct device_attribute *attr, char *buf)
 {
-//	PrintLog_DEBUG("CalibrateBTM = %d\n" , CalibrateBTM);
 	return sprintf(buf, "%d\n", CalibrateBTM);
 }
 
@@ -240,14 +238,8 @@ static ssize_t CalibrateBTM_store(struct device *dev,
 	char tmp1=0, tmp2=0;
 
 	memset(Calibrated_BTM_raw, 0, NV_BTM_SIZE);
-//	PrintLog_INFO("count=%d\n", count);
-//	PrintLog_INFO("%s\n", buf);
-//	for(i=0;i<count;i++)
-//		PrintLog_INFO("0x%x\n", *(buf+i));
-//	PrintLog_INFO("test-01!!\n");
 	for(i=0;i<count-1;i++)
 	{
-//		PrintLog_INFO("buf[%d]=0x%x\n", i, buf[i]);
 		if ((buf[i]>='0') && (buf[i]<='9'))
 		{
 			tmp1=(char)(buf[i]-'0');
@@ -264,7 +256,6 @@ static ssize_t CalibrateBTM_store(struct device *dev,
 		{
 			tmp1=0x00;
 		}
-//		PrintLog_INFO("0x%x\n", tmp1);
 		if(i%2)
 		{
 			tmp2|=tmp1;
@@ -275,9 +266,7 @@ static ssize_t CalibrateBTM_store(struct device *dev,
 			tmp2=tmp1<<4;
 		}
 	}
-//	PrintLog_INFO("test-02!!\n");
-//	for(i=0;i<NV_BTM_SIZE;i++)
-//		PrintLog_INFO("0x%x\n", *(Calibrated_BTM_raw+i));
+
 	if (!CalibrateBTM) {
 		PrintLog_INFO("Calibrate_BTM\n");
 		if(btm_calibrate(Calibrated_BTM_raw, NV_BTM_SIZE))
@@ -288,14 +277,7 @@ static ssize_t CalibrateBTM_store(struct device *dev,
 }
 static DEVICE_ATTR(CalibrateBTM, 0644, CalibrateBTM_show , CalibrateBTM_store);
 
-// struct device_attribute dev_attr_CalibrateBTM = 
-// {
-//	struct attribute	attr; -> attr.name -> "CalibrateBTM", attr.mode -> 0644
-//	ssize_t (*show)(struct device *dev, struct device_attribute *attr, char *buf); -> CalibrateBTM_show()
-//	ssize_t (*store)(struct device *dev, struct device_attribute *attr, const char *buf, size_t count); -> CalibrateBTM_store()
-// }
-
-#endif//E:YF
+#endif
 
 static int32_t pm8xxx_adc_check_channel_valid(uint32_t channel)
 {
@@ -407,17 +389,17 @@ static int32_t pm8xxx_adc_channel_power_enable(uint32_t channel,
 
 	switch (channel) {
 	case ADC_MPP_1_AMUX8:
-#ifdef ORG_VER//S:YF
+#ifdef ORG_VER
 #else
         case CHANNEL_BATT_THERM:
 	case ADC_MPP_1_AMUX3:
 	case ADC_MPP_1_AMUX4:
-#endif//E:YF
+#endif
 		rc = pm8xxx_adc_patherm_power(power_cntrl);
-#ifdef ORG_VER//S:YF
+#ifdef ORG_VER
 #else
                 msleep(1);
-#endif//E:YF
+#endif
 		break;
 	case CHANNEL_DIE_TEMP:
 	case CHANNEL_MUXOFF:

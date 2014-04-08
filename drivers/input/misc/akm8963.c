@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2007-2008 HTC Corporation.
  * Author: Hou-Kun Chen <houkun.chen@gmail.com>
- * Copyright (C) 2012 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * This software is licensed under the terms of the GNU General Public
  * License version 2, as published by the Free Software Foundation, and
@@ -32,41 +32,41 @@
 #include <linux/workqueue.h>
 #include <linux/freezer.h>
 #include <linux/akm8963.h>
-#if 1   // add by 
+#if 1
 #include <linux/regulator/consumer.h>
 #endif
 
-#if 1   // add for 1030 THIS_MODULE define and MODULE_AUTHOR...
+#if 1
 #include <linux/module.h>
 #endif
 
 /*---------------------  Static Definitions -------------------------*/
-#define AKM_DEBUG 0   //0:disable, 1:enable
+#define AKM_DEBUG 0
 #if(AKM_DEBUG)
     #define Printhh(string, args...)    printk("AKM(K)=> "string, ##args);
 #else
     #define Printhh(string, args...)
 #endif
 
-#define AKM_TIP 1 //give RD information. Set 1 if develop,and set 0 when release.
+#define AKM_TIP 1
 #if(AKM_TIP)
     #define PrintTip(string, args...)    printk("AKM(K)=> "string, ##args);
 #else
     #define PrintTip(string, args...)
 #endif
 
-#if 1   //TBD??
+#if 1
 #undef dev_dbg
 #undef dev_vdbg
 #define dev_dbg(dev, format, arg...) do { (void)(dev); } while (0)
 #define dev_vdbg(dev, format, arg...) do { (void)(dev); } while (0)
 #endif
 
-#if 0   // only for debug
+#if 0
 static void s_vDumpReg(struct i2c_client *i2c, int iRegAddr);
 #endif
 
-#if 1   // add for 
+#if 1
 #define AKM_I2C_SDA_GPIO   44
 #define AKM_I2C_CLK_GPIO   45
 #define AKM_DRDY_GPIO   70
@@ -80,7 +80,6 @@ static void s_vDumpReg(struct i2c_client *i2c, int iRegAddr);
 
 #define AKM_ACCEL_ITEMS 3
 /* Wait timeout in millisecond */
-//#define AKM8963_DRDY_TIMEOUT	100
 #define AKM8963_DRDY_TIMEOUT	200
 
 struct akm8963_data {
@@ -136,7 +135,7 @@ static int akm8963_i2c_rxdata(
 		.len = length,
 		.buf = rxData,
 	}, };
-    #if 0   // MK        
+    #if 0
 	unsigned char addr = rxData[0];
     #endif
 
@@ -320,21 +319,17 @@ static int AKECS_SetMode(
 {
 	int err;
 
-	//Printhh("[%s] mode=%#x..\n", __FUNCTION__, mode);
 
 	switch (mode & 0x0F) {
 	case AK8963_MODE_SNG_MEASURE:
 	case AK8963_MODE_SELF_TEST:
 	case AK8963_MODE_FUSE_ACCESS:
-		//Printhh("[%s] 111\n", __FUNCTION__);
-		//s_vDumpReg(akm->i2c, AK8963_REG_CNTL1);
 		err = AKECS_Set_CNTL1(akm, mode);
 		if ((err >= 0) && (akm->irq == 0)) {
 			schedule_delayed_work(
 				&akm->work,
-				usecs_to_jiffies(AK8963_MEASUREMENT_TIME_US));  //: ==akm8963_delayed_work()
+				usecs_to_jiffies(AK8963_MEASUREMENT_TIME_US));
 		}
-		//Printhh("[%s] 222\n", __FUNCTION__);
             #if 0
 		s_vDumpReg(akm->i2c, AK8963_REG_CNTL1);
             #endif
@@ -363,15 +358,14 @@ static int AKECS_GetData(
 	int size)
 {
 	int err;
-#if 0   // test data
+#if 0
     static int ii[3] = {0, 0, 0};
 #endif
 
-	//Printhh("[%s] enter..call wait_event_interruptible_timeout(100ms)\n", __FUNCTION__);
 	err = wait_event_interruptible_timeout(
 			akm->drdy_wq,
 			atomic_read(&akm->drdy),
-			AKM8963_DRDY_TIMEOUT);  // : in akm8963_irq() will set akm->drdy = 1
+			AKM8963_DRDY_TIMEOUT);
 
 	if (err < 0) {
 		dev_err(&akm->i2c->dev,
@@ -379,14 +373,14 @@ static int AKECS_GetData(
 		return -1;
 	}
 	if (!atomic_read(&akm->drdy)) {
-            #if 1   // : mask, H/W ready should remask
+            #if 1
 		dev_err(&akm->i2c->dev,
 			"%s: DRDY is not set.", __func__);
 		return -1;
             #endif
 	}
 
-#if 0   // test data
+#if 0
         akm->sense_data[0] = 0x01;
 
         akm->sense_data[1] = (ii[0]++)%256;
@@ -413,8 +407,6 @@ static void AKECS_SetYPR(
 {
 	uint32_t ready;
 
-	//Printhh("[%s] enter...\n", __FUNCTION__);
-
 	dev_vdbg(&akm->i2c->dev, "AKM8963 %s: flag =0x%X", __func__,
 		rbuf[0]);
 	dev_vdbg(&akm->input->dev, "  Acceleration[LSB]: %6d,%6d,%6d stat=%d",
@@ -424,7 +416,7 @@ static void AKECS_SetYPR(
 	dev_vdbg(&akm->input->dev, "  Orientation[YPR] : %6d,%6d,%6d",
 		rbuf[9], rbuf[10], rbuf[11]);
 
-#if 0    // debug
+#if 0
 	Printhh("AKM8963 %s: flag =0x%X\n", __func__,
 		rbuf[0]);
 	Printhh("  Acceleration[LSB]: %6d,%6d,%6d stat=%d\n",
@@ -455,7 +447,6 @@ static void AKECS_SetYPR(
 	}
 	/* Report magnetic vector information */
 	if (ready & MAG_DATA_READY) {
-		//Printhh("[%s] input_report_abs(MAG_DATA_READY)...\n", __FUNCTION__);
 		input_report_abs(akm->input, ABS_RX, rbuf[5]);
 		input_report_abs(akm->input, ABS_RY, rbuf[6]);
 		input_report_abs(akm->input, ABS_RZ, rbuf[7]);
@@ -516,7 +507,6 @@ AKECS_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 	int status;			/* for OPEN/CLOSE_STATUS */
 	int ret = -1;		/* Return value. */
 
-	//Printhh("[%s] enter..\n", __FUNCTION__);
 	memset(i2c_buf, 0, RWBUF_SIZE);
 
 	switch (cmd) {
@@ -550,9 +540,7 @@ AKECS_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 			dev_err(&akm->i2c->dev, "copy_from_user failed.");
 			return -EFAULT;
 		}
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
+
 		break;
 	case ECS_IOCTL_GETDATA:
 	case ECS_IOCTL_GET_OPEN_STATUS:
@@ -881,7 +869,7 @@ static void akm8963_sysfs_update_active_status(
 		}
 	} else {    //: enable sensor
 		if (atomic_cmpxchg(&akm->active, 0, 1) == 0) {  // : atomic_cmpxchg(v, old, new); comapre v == old, if yes then set v=new and return old
-		                                                                    // i.e. compare akm->active == 0, if yes then set akm->active=1 and return 0
+    // compare akm->active == 0, if yes then set akm->active=1 and return 0
 			wake_up(&akm->open_wq);
 			dev_dbg(akm->class_dev, "Activated");
 		}
@@ -900,10 +888,7 @@ static ssize_t akm8963_sysfs_enable_show(
 	mutex_lock(&akm->val_mutex);
 	flag = ((akm->enable_flag >> pos) & 1);
 	mutex_unlock(&akm->val_mutex);
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
-	//return sprintf(buf, "%d\n", flag);
+
 	return snprintf(buf, PAGE_SIZE, "%d\n", flag);
 }
 
@@ -990,10 +975,7 @@ static ssize_t akm8963_sysfs_delay_show(
 	mutex_lock(&akm->val_mutex);
 	val = akm->delay[pos];
 	mutex_unlock(&akm->val_mutex);
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
-	//return sprintf(buf, "%lld\n", val);
+
 	return snprintf(buf, PAGE_SIZE, "%lld\n", val);
 }
 
@@ -1084,7 +1066,6 @@ static ssize_t akm8963_bin_accel_write(
 	struct device *dev = container_of(kobj, struct device, kobj);
 	struct akm8963_data *akm = dev_get_drvdata(dev);
 	int16_t *accel_data;
-	//Printhh("[%s] enter..\n", __FUNCTION__);
 
 	if (size == 0)
 		return 0;
@@ -1139,9 +1120,6 @@ static ssize_t akm8963_bdata_show(
 	memcpy(&rbuf, akm->sense_data, sizeof(rbuf));
 	mutex_unlock(&akm->sensor_mutex);
 
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
 #if 0
 	return sprintf(buf,
 		"0x%02X,0x%02X,0x%02X,0x%02X,"
@@ -1176,11 +1154,7 @@ static ssize_t akm8963_asa_show(
 	err = AKECS_SetMode(akm, AK8963_MODE_POWERDOWN);
 	if (err < 0)
 		return err;
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
-	//return sprintf(buf, "0x%02X,0x%02X,0x%02X\n",
-	//	asa[0], asa[1], asa[2]);
+
 	return snprintf(buf, PAGE_SIZE, "0x%02X,0x%02X,0x%02X\n",
 		asa[0], asa[1], asa[2]);
 
@@ -1225,7 +1199,6 @@ static struct bin_attribute akm8963_bin_attributes[] = {
 static char const *const compass_class_name = "compass";
 static char const *const akm8963_device_name = "akm8963";
 static char const *const device_link_name = "i2c";
-//static dev_t const akm8963_device_dev_t = MKDEV(MISC_MAJOR, 240);
 static dev_t const akm8963_device_dev_t = MKDEV(MISC_MAJOR, MISC_DYNAMIC_MINOR);
 
 static int create_sysfs_interfaces(struct akm8963_data *akm)
@@ -1239,7 +1212,6 @@ static int create_sysfs_interfaces(struct akm8963_data *akm)
 	Printhh("[%s] enter..\n", __FUNCTION__);
 
     akm->compass = class_create(THIS_MODULE, compass_class_name);
-//    akm->compass = class_create(((struct module *)0), compass_class_name);
 	if (IS_ERR(akm->compass)) {
 		err = PTR_ERR(akm->compass);
 		goto exit_class_create_failed;
@@ -1385,7 +1357,6 @@ static void s_vDumpReg(struct i2c_client *i2c, int iRegAddr)
 
     Printhh("[%s] enter..\n", __FUNCTION__);
     memset(buffer, 0, sizeof(buffer));
-    //buffer[0] = AK8963_REG_CNTL1;
     buffer[0] = iRegAddr;
 
     err = akm8963_i2c_rxdata(i2c, buffer, 1);
@@ -1411,7 +1382,6 @@ static irqreturn_t akm8963_irq(int irq, void *handle)
     static int ii[3] = {0, 0, 0};
 #endif
 
-	//Printhh("[%s] enter..\n", __FUNCTION__);
 
 	memset(buffer, 0, sizeof(buffer));
 	buffer[0] = AK8963_REG_ST1;
@@ -1422,7 +1392,6 @@ static irqreturn_t akm8963_irq(int irq, void *handle)
 		goto work_func_end;
 	}
 
-	//s_vDumpReg(akm->i2c, AK8963_REG_CNTL1);
 #if 0   // test data
         buffer[0] = 0x01;
 
@@ -1435,7 +1404,6 @@ static irqreturn_t akm8963_irq(int irq, void *handle)
 
         buffer[7] = 0x10;
 #endif
-	//Printhh("[%s] buffer[0]=%#x..\n", __FUNCTION__, buffer[0]);
 #if 0
     iGpioData = gpio_get_value(70);
     Printhh("[%s] iGpioData(gpio70)=%d..\n", __FUNCTION__, iGpioData);
@@ -1452,7 +1420,7 @@ static irqreturn_t akm8963_irq(int irq, void *handle)
 
 	atomic_set(&akm->drdy, 1);
 	atomic_set(&akm->is_busy, 0);
-	wake_up(&akm->drdy_wq); //: wake up AKECS_GetData()
+	wake_up(&akm->drdy_wq);
 
 work_func_end:
 	return IRQ_HANDLED;
@@ -1482,7 +1450,7 @@ static int akm8963_resume(struct device *dev)
 	Printhh("[%s] enter..\n", __FUNCTION__);
 	dev_dbg(&akm->i2c->dev, "resumed\n");
     
-#if 0   //  debug
+#if 0
     PrintTip("[%s]GPIO info\n", __FUNCTION__);
     cci_gpio_dump_setting(AKM_DRDY_GPIO);
 #endif
@@ -1490,13 +1458,6 @@ static int akm8963_resume(struct device *dev)
 	return 0;
 }
 
-
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
-//
-// , 20120728, [ ] Correct regulator.
-//
 #if 0
 static int s_iEnDisPower(bool bEn)
 {
@@ -1507,11 +1468,8 @@ static int s_iEnDisPower(bool bEn)
 
     Printhh("[%s] enter...\n", __FUNCTION__);
 
-    if(bEn == true)     //turn on power
+    if(bEn == true)
     {
-        //
-        //  L_9
-        //
         reg_l9 = regulator_get(NULL,"8038_l9");
         if (IS_ERR(reg_l9)) {
             PrintTip("[%s] could not get 8038_l9, rc = %ld\n", __FUNCTION__, PTR_ERR(reg_l9));
@@ -1535,9 +1493,6 @@ static int s_iEnDisPower(bool bEn)
             return -ENODEV;
         }
 
-        //
-        //  LVS2
-        //
         reg_lvs2 = regulator_get(NULL,"8038_lvs2");
         if (IS_ERR(reg_lvs2)) {
             PrintTip("[%s] could not get 8038_lvs2, rc = %ld\n", __FUNCTION__, PTR_ERR(reg_lvs2));
@@ -1555,9 +1510,6 @@ static int s_iEnDisPower(bool bEn)
     }
     else
     {
-        //
-        //  L_9
-        //
         reg_l9 = regulator_get(NULL,"8038_l9");
         if (IS_ERR(reg_l9)) {
             PrintTip("[%s] could not get 8038_l9, rc = %ld\n", __FUNCTION__, PTR_ERR(reg_l9));
@@ -1573,9 +1525,6 @@ static int s_iEnDisPower(bool bEn)
             return -ENODEV;
         }
 
-        //
-        //  LVS2
-        //
         reg_lvs2 = regulator_get(NULL,"8038_lvs2");
         if (IS_ERR(reg_lvs2)) {
             PrintTip("[%s] could not get 8038_lvs2, rc = %ld\n", __FUNCTION__, PTR_ERR(reg_lvs2));
@@ -1597,7 +1546,6 @@ static int s_iEnDisPower(bool bEn)
 
 }
 #endif
-// 
 
 
 int akm8963_probe(struct i2c_client *client, const struct i2c_device_id *id)
@@ -1609,9 +1557,6 @@ int akm8963_probe(struct i2c_client *client, const struct i2c_device_id *id)
     int iGpioData = -1;
     int rc;
 
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
 #if 0
     int ii=0;
     bool bEn = true;
@@ -1621,18 +1566,11 @@ int akm8963_probe(struct i2c_client *client, const struct i2c_device_id *id)
 	PrintTip("[%s] enter..\n", __FUNCTION__);
 
 
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
-//
-// , 20120728, [ ] Correct regulator.
-//
-#if 0   // enable 8038 regulator; MK because already do this in board-8963.c; wait for p&l sensor and TP finish.
+#if 0
     if(ii == 1)
         s_iEnDisPower(bEn);
  #endif
 
-	//dev_dbg(&client->dev, "start probing.");
 
 	if (!i2c_check_functionality(client->adapter, I2C_FUNC_I2C)) {
 		dev_err(&client->dev, "%s: check_functionality failed.", __func__);
@@ -1659,19 +1597,16 @@ int akm8963_probe(struct i2c_client *client, const struct i2c_device_id *id)
 	} else {
 		/* Platform data is not available.
 		   Layout and Outbit information should be set by each application. */
-		//dev_dbg(&client->dev, "%s: No platform data.", __func__);
 		s_akm->layout = 0;
 		s_akm->outbit = 0;
 		s_akm->rstn = 0;
 	}
 
 
-#if 1   // add for GPIO setting    ; g_sAkm8963, s_akm->rstn=94
+#if 1
     if(s_akm->rstn != 0)
     {
         if (gpio_tlmm_config(GPIO_CFG(s_akm->rstn, 0,GPIO_CFG_OUTPUT,  GPIO_CFG_PULL_UP ,GPIO_CFG_2MA),GPIO_CFG_ENABLE)) {
-        //H/W suggest for test
-        //if (gpio_tlmm_config(GPIO_CFG(s_akm->rstn, 0,GPIO_CFG_OUTPUT,  GPIO_CFG_NO_PULL ,GPIO_CFG_2MA),GPIO_CFG_ENABLE)) {
             PrintTip("[%s] Config GPIO-%d error\n", __FUNCTION__, s_akm->rstn);
             printk(KERN_ERR "%s: Err: Config GPIO-%d \n",	__func__, s_akm->rstn);
         }
@@ -1724,13 +1659,11 @@ int akm8963_probe(struct i2c_client *client, const struct i2c_device_id *id)
 
 
 	/***** IRQ setup *****/
-	s_akm->irq = client->irq;   // ==> msm_i2c_ak8963_ecompass_info
+	s_akm->irq = client->irq;
 
 	PrintTip("[%s] s_akm->irq = %d\n", __FUNCTION__, s_akm->irq);
-#if 1   // add for GPIO setting
+#if 1
     if (gpio_tlmm_config(GPIO_CFG(AKM_DRDY_GPIO, 0, GPIO_CFG_INPUT,GPIO_CFG_NO_PULL,GPIO_CFG_2MA),GPIO_CFG_ENABLE)) {
-    //H/W suggest for test
-    //if (gpio_tlmm_config(GPIO_CFG(AKM_DRDY_GPIO, 0, GPIO_CFG_INPUT,GPIO_CFG_PULL_UP,GPIO_CFG_2MA),GPIO_CFG_ENABLE)) {
         printk(KERN_ERR "%s: Err: Config GPIO-%d \n", __func__, AKM_DRDY_GPIO);
     }
 
@@ -1747,22 +1680,16 @@ int akm8963_probe(struct i2c_client *client, const struct i2c_device_id *id)
 
 
 	if (s_akm->irq == 0) {
-		//dev_dbg(&client->dev, "%s: IRQ is not set.", __func__);
 		/* Use timer to notify measurement end */
 		INIT_DELAYED_WORK(&s_akm->work, akm8963_delayed_work);
 	} else {
-//  
-// , 20120729, [ ] E-compass driver will receive twice interrupt while data ready..  
-// Interrupt pin too slow change to Low from High, will casue enter ISR twice.   
-//  
 		err = request_threaded_irq(
 				s_akm->irq,
 				NULL,
 				akm8963_irq,
-//				IRQF_TRIGGER_HIGH|IRQF_ONESHOT,
 				IRQF_TRIGGER_RISING|IRQF_ONESHOT,
 				dev_name(&client->dev),
-				s_akm); //: TBD s_akm->irq!!!!!!! modify msm_i2c_ak8963_ecompass_info
+				s_akm);
 		if (err < 0) {
 			dev_err(&client->dev,
 				"%s: request irq failed.", __func__);
@@ -1789,7 +1716,7 @@ int akm8963_probe(struct i2c_client *client, const struct i2c_device_id *id)
 
 	dev_info(&client->dev, "successfully probed.");
 
-#if 0   //  debug
+#if 0
     PrintTip("\n[%s]GPIO info\n", __FUNCTION__);
     cci_gpio_dump_setting(AKM_DRDY_GPIO);
 #endif
@@ -1805,14 +1732,14 @@ exit4:
 	input_unregister_device(s_akm->input);
 exit3:
 
-#if 1   // MK
+#if 1
 exit2:
 #endif
 
 	kfree(s_akm);
 exit1:
 
-#if 1   // MK
+#if 1
 exit0:
 #endif
 
@@ -1859,11 +1786,8 @@ static int __init akm8963_init(void)
     int ii;
 	printk(KERN_INFO "AKM8963 compass driver: initialize.\n");
 	PrintTip("[%s] enter..\n", __FUNCTION__);
-
     ii = i2c_add_driver(&akm8963_driver);
 	PrintTip("[%s] ii = %d\n", __FUNCTION__, ii);
-
-	//return i2c_add_driver(&akm8963_driver);
 	return ii;
 }
 

@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2012, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2011-2014, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -4152,10 +4152,9 @@ static void vfe32_process_reset_irq(
 		if (atomic_read(&fault_recovery) == 1) {
 			atomic_set(&recovery_active, 0);
 			pr_err("potential page fault occured, stop recovery & send app notification");
-			v4l2_subdev_notify(&vfe32_ctrl->subdev, NOTIFY_VFE_CAMIF_ERROR,
-					(void *)NULL);
+			v4l2_subdev_notify(&vfe32_ctrl->subdev, NOTIFY_VFE_CAMIF_ERROR,(void *)NULL);
 			vfe32_send_isp_msg(&vfe32_ctrl->subdev,
-					vfe32_ctrl->share_ctrl->vfeFrameId, MSG_ID_CAMIF_ERROR);
+				vfe32_ctrl->share_ctrl->vfeFrameId, MSG_ID_CAMIF_ERROR);
 			return;
 		}
 

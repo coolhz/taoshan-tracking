@@ -41,7 +41,7 @@ static struct msm_cam_expander_info cam_expander_info[] = {
 	},
 };
 #endif
-#endif //ORG_VER
+#endif
 
 static struct gpiomux_setting cam_settings[] = {
 	{
@@ -102,12 +102,12 @@ static struct gpiomux_setting cam_settings[] = {
 		.drv = GPIOMUX_DRV_2MA,
 		.pull = GPIOMUX_PULL_NONE,
 	},
-//B 2012/07/22
+
     {
         .func = GPIOMUX_FUNC_GPIO, /* camera flash enable */
         .drv = GPIOMUX_DRV_8MA,
-        .pull = GPIOMUX_PULL_NONE,//2012/08/09
-        .dir = GPIOMUX_OUT_HIGH, //2012/08/06
+        .pull = GPIOMUX_PULL_NONE,
+        .dir = GPIOMUX_OUT_HIGH,
     },
 
    	{		
@@ -115,16 +115,13 @@ static struct gpiomux_setting cam_settings[] = {
 		.drv = GPIOMUX_DRV_2MA,
 		.pull = GPIOMUX_PULL_KEEPER,
 	},
-//B 2012/08/06
 	{
 		.func = GPIOMUX_FUNC_GPIO, /*suspend*/
 		.drv = GPIOMUX_DRV_2MA,
-		.pull = GPIOMUX_PULL_NONE,//2012/08/09
+		.pull = GPIOMUX_PULL_NONE,
 		.dir = GPIOMUX_OUT_LOW,
 	},
-//E 2012/08/06
-//E 2012/07/22
-//B 2012/08/07
+
     {
 		.func = GPIOMUX_FUNC_GPIO,
 		.drv = GPIOMUX_DRV_2MA,
@@ -138,7 +135,6 @@ static struct gpiomux_setting cam_settings[] = {
 		.pull = GPIOMUX_PULL_NONE,
 		.dir = GPIOMUX_OUT_LOW,
 	},
-//E 2012/08/07
 };
 
 
@@ -146,8 +142,8 @@ static struct msm_gpiomux_config msm8930_cam_common_configs[] = {
 	{
 		.gpio = 2,
 		.settings = {
-			[GPIOMUX_ACTIVE]    = &cam_settings[10],//2012/07/22
-			[GPIOMUX_SUSPENDED] = &cam_settings[10],//2012/08/09
+			[GPIOMUX_ACTIVE]    = &cam_settings[10],
+			[GPIOMUX_SUSPENDED] = &cam_settings[10],
 		},
 	},
 #if 0 
@@ -176,17 +172,15 @@ static struct msm_gpiomux_config msm8930_cam_common_configs[] = {
 	{
 		.gpio = 76,
 		.settings = {
-		/*B:20120815  */
 			[GPIOMUX_ACTIVE]    = &cam_settings[2],
 			[GPIOMUX_SUSPENDED] = &cam_settings[13],
-		/*E:20120815  */
 		},
 	},
 	{
 		.gpio = 107,
 		.settings = {
 			[GPIOMUX_ACTIVE]    = &cam_settings[2],
-			[GPIOMUX_SUSPENDED] = &cam_settings[14],//2012/08/07
+			[GPIOMUX_SUSPENDED] = &cam_settings[14],
 		},
 	},
 #if 0 
@@ -201,17 +195,15 @@ static struct msm_gpiomux_config msm8930_cam_common_configs[] = {
         {
             .gpio = 6,
             .settings = {
-//B 2012/08/06
-                [GPIOMUX_ACTIVE]    = &cam_settings[12],//2012/07/22
+                [GPIOMUX_ACTIVE]    = &cam_settings[12],
                 [GPIOMUX_SUSPENDED] = &cam_settings[12],
-//E 2012/08/06
             },
         },
         {
             .gpio = 93,
             .settings = {
                 [GPIOMUX_ACTIVE]    = &cam_settings[2],
-                [GPIOMUX_SUSPENDED] = &cam_settings[13],//2012/08/07
+                [GPIOMUX_SUSPENDED] = &cam_settings[13],
             },
         },
 };
@@ -225,7 +217,7 @@ static struct msm_gpiomux_config msm8930_evt_cam_configs[] = {
 		},
 	},
 };
-#endif //ORG_VER
+#endif
 static struct msm_gpiomux_config msm8930_cam_2d_configs[] = {
 	{
 		.gpio = 18,
@@ -245,14 +237,14 @@ static struct msm_gpiomux_config msm8930_cam_2d_configs[] = {
 		.gpio = 20,
 		.settings = {
 			[GPIOMUX_ACTIVE]    = &cam_settings[3],
-			[GPIOMUX_SUSPENDED] = &cam_settings[11],//2012/07/22
+			[GPIOMUX_SUSPENDED] = &cam_settings[11],
 		},
 	},
 	{
 		.gpio = 21,
 		.settings = {
 			[GPIOMUX_ACTIVE]    = &cam_settings[3],
-			[GPIOMUX_SUSPENDED] = &cam_settings[11],//2012/07/22
+			[GPIOMUX_SUSPENDED] = &cam_settings[11],
 		},
 	},
 };
@@ -273,7 +265,7 @@ static struct msm_gpiomux_config msm8930_evt_cam_2d_configs[] = {
 		},
 	},
 };
-#endif //ORG_VER
+#endif
 #define VFE_CAMIF_TIMER1_GPIO 2
 #define VFE_CAMIF_TIMER2_GPIO 6
 #ifdef ORG_VER
@@ -285,14 +277,14 @@ static struct msm_camera_sensor_strobe_flash_data strobe_flash_xenon = {
 	.flash_recharge_duration = 50000,
 	.irq = MSM_GPIO_TO_INT(VFE_CAMIF_TIMER3_GPIO_INT),
 };
-#endif //ORG_VER
+#endif
 
 #ifdef CONFIG_MSM_CAMERA_FLASH
 static struct msm_camera_sensor_flash_src msm_flash_src = {
 	.flash_sr_type = MSM_CAMERA_FLASH_SRC_EXT,
 	._fsrc.ext_driver_src.led_en = VFE_CAMIF_TIMER1_GPIO,
 	._fsrc.ext_driver_src.led_flash_en = VFE_CAMIF_TIMER2_GPIO,
-	._fsrc.ext_driver_src.flash_id = MAM_CAMERA_EXT_LED_FLASH_LM3561,//2012/07/22
+	._fsrc.ext_driver_src.flash_id = MAM_CAMERA_EXT_LED_FLASH_LM3561, // Sony Camera LED
 };
 #ifdef ORG_VER
 static struct msm_camera_sensor_flash_src msm_flash_src_led = {
@@ -328,10 +320,8 @@ static struct msm_bus_vectors cam_preview_vectors[] = {
 	{
 		.src = MSM_BUS_MASTER_VFE,
 		.dst = MSM_BUS_SLAVE_EBI_CH0,
-		// 20121210
 		.ab  = 302071680,
 		.ib  = 1208286720,
-		// 20121210
 	},
 	{
 		.src = MSM_BUS_MASTER_VPE,
@@ -351,13 +341,6 @@ static struct msm_bus_vectors cam_video_vectors[] = {
 	{
 		.src = MSM_BUS_MASTER_VFE,
 		.dst = MSM_BUS_SLAVE_EBI_CH0,
-		// 20121210
-		//.ab  = 600000000,
-		//.ib  = 1208286720,
-		// 20121210
-		//QCT 12321 modified
-		//.ab  = 600000000,
-		//.ib  = 561807360,
 		.ab  = 800000000,
 		.ib  = 2656000000UL,
 	},
@@ -523,7 +506,7 @@ static struct camera_vreg_t msm_8930_evt_cam_vreg[] = {
 	{"cam_vana", REG_LDO, 2800000, 2850000, 85600},
 	{"cam_vaf", REG_LDO, 2800000, 2850000, 300000},
 };
-#endif //ORG_VER
+#endif
 
 static struct gpio msm8930_common_cam_gpio[] = {
 	{20, GPIOF_DIR_IN, "CAMIF_I2C_DATA"},
@@ -534,7 +517,7 @@ static struct gpio msm8930_evt_common_cam_gpio[] = {
 	{36, GPIOF_DIR_IN, "CAMIF_I2C_DATA"},
 	{37, GPIOF_DIR_IN, "CAMIF_I2C_CLK"},
 };
-#endif //ORG_VER
+#endif
 static struct gpio msm8930_front_cam_gpio[] = {
 	{4, GPIOF_DIR_IN, "CAMIF_MCLK"},
 	{76, GPIOF_OUT_INIT_HIGH, "CAM_RESET"},
@@ -545,7 +528,7 @@ static struct gpio msm8930_evt_front_cam_gpio[] = {
 	{76, GPIOF_DIR_OUT, "CAM_RESET"},
 	{75, GPIOF_DIR_OUT, "CAM_STBY_N"},
 };
-#endif //ORG_VER
+#endif
 static struct gpio msm8930_back_cam_gpio[] = {
 	{5, GPIOF_DIR_IN, "CAMIF_MCLK"},
 	{107, GPIOF_DIR_OUT, "CAM_RESET"},
@@ -555,8 +538,7 @@ static struct gpio msm8930_back_cam_gpio[] = {
 };
 
 static struct msm_gpio_set_tbl msm8930_front_cam_gpio_set_tbl[] = {
-    //{76, GPIOF_OUT_INIT_HIGH, 6000},//2012/10/29
-	{76, GPIOF_OUT_INIT_HIGH, 8000},//2012/11/15 
+	{76, GPIOF_OUT_INIT_HIGH, 8000},
 	{76, GPIOF_OUT_INIT_LOW, 1000},
 };
 #ifdef ORG_VER
@@ -566,12 +548,12 @@ static struct msm_gpio_set_tbl msm8930_evt_front_cam_gpio_set_tbl[] = {
 	{76, GPIOF_OUT_INIT_LOW, 1000},
 	{76, GPIOF_OUT_INIT_HIGH, 4000},
 };
-#endif //ORG_VER
+#endif
 static struct msm_gpio_set_tbl msm8930_back_cam_gpio_set_tbl[] = {
 #ifdef ORG_VER
 	{54, GPIOF_OUT_INIT_LOW, 1000},
 	{54, GPIOF_OUT_INIT_HIGH, 4000},
-#endif //ORG_VER
+#endif
 	{107, GPIOF_OUT_INIT_LOW, 1000},
 	{107, GPIOF_OUT_INIT_HIGH, 4000},
 };
@@ -597,7 +579,7 @@ static struct msm_camera_gpio_conf msm_8930_evt__front_cam_gpio_conf = {
 	.cam_gpio_set_tbl = msm8930_evt_front_cam_gpio_set_tbl,
 	.cam_gpio_set_tbl_size = ARRAY_SIZE(msm8930_evt_front_cam_gpio_set_tbl),
 };
-#endif //ORG_VER
+#endif
 static struct msm_camera_gpio_conf msm_8930_back_cam_gpio_conf = {
 	.cam_gpiomux_conf_tbl = msm8930_cam_2d_configs,
 	.cam_gpiomux_conf_tbl_size = ARRAY_SIZE(msm8930_cam_2d_configs),
@@ -619,21 +601,11 @@ static struct msm_camera_gpio_conf msm_8930_evt_back_cam_gpio_conf = {
 	.cam_gpio_set_tbl = msm8930_back_cam_gpio_set_tbl,
 	.cam_gpio_set_tbl_size = ARRAY_SIZE(msm8930_back_cam_gpio_set_tbl),
 };
-#endif //ORG_VER
+#endif
 static struct i2c_board_info msm_act_main_cam_i2c_info = {
 	I2C_BOARD_INFO("msm_actuator", 0x18),
 };
 
-/*
-static struct msm_actuator_info msm_act_main_cam_0_info = {
-	.board_info     = &msm_act_main_cam_i2c_info,
-	.cam_name   = MSM_ACTUATOR_MAIN_CAM_0,
-	.bus_id         = MSM_8930_GSBI4_QUP_I2C_BUS_ID,
-	.vcm_pwd        = 0,
-	.vcm_enable     = 0,
-};
-*/
-/*B:[bug328] af porting, cloony 20120807 */
 static struct msm_actuator_info msm_act_main_cam_1_info = {
 	.board_info     = &msm_act_main_cam_i2c_info,
 	.cam_name   = MSM_ACTUATOR_MAIN_CAM_1,
@@ -641,11 +613,11 @@ static struct msm_actuator_info msm_act_main_cam_1_info = {
 	.vcm_pwd        = 0,
 	.vcm_enable     = 0,
 };
-/*E:[bug328] af porting, cloony 20120807 */
+
 
 #ifndef ORG_VER
 #ifdef CONFIG_IMX134
-///
+
 static struct msm_camera_csi_lane_params imx134_csi_lane_params = {
 	.csi_lane_assign = 0xE4,
 	.csi_lane_mask = 0xF,
@@ -658,14 +630,14 @@ static struct camera_vreg_t msm_8930_imx134_vreg[] = {
 };
 
 static struct msm_camera_sensor_flash_data flash_imx134 = {
-	.flash_type	= MSM_CAMERA_FLASH_LED,//2012/07/22
+	.flash_type	= MSM_CAMERA_FLASH_LED,
 #ifdef CONFIG_MSM_CAMERA_FLASH
 	.flash_src	= &msm_flash_src
 #endif
 };
 
 static struct msm_camera_sensor_platform_info sensor_board_info_imx134 = {
-	.mount_angle	= 90,//2012/09/19
+	.mount_angle	= 90,
 	.cam_vreg = msm_8930_imx134_vreg,
 	.num_vreg = ARRAY_SIZE(msm_8930_imx134_vreg),
 	.gpio_conf = &msm_8930_back_cam_gpio_conf,
@@ -689,13 +661,12 @@ static struct msm_camera_sensor_info msm_camera_sensor_imx134_data = {
 	.csi_if	= 1,
 	.camera_type = BACK_CAMERA_2D,
 	.sensor_type = BAYER_SENSOR,
-	.actuator_info = &msm_act_main_cam_1_info,//[bug328] af porting, cloony 20120807
-	.eeprom_info = &imx134_eeprom_info,//20120921 
+	.actuator_info = &msm_act_main_cam_1_info,
+	.eeprom_info = &imx134_eeprom_info,
 };
 
-#endif //CONFIG_IMX134
+#endif
 
-///
 static struct camera_vreg_t msm_8930_ov7692_vreg[] = {
 	{"cam_vio", REG_VS, 0, 0, 0},
 	{"cam_vana", REG_LDO, 2850000, 2850000, 2850000},
@@ -737,6 +708,7 @@ static struct msm_actuator_info msm_act_main_cam_3_info = {
 	.vcm_pwd        = 0,
 	.vcm_enable     = 0,
 };
+
 
 static struct msm_camera_sensor_flash_data flash_ov8825 = {
 	.flash_type = MSM_CAMERA_FLASH_LED,
@@ -926,7 +898,7 @@ static struct msm_camera_sensor_info msm_camera_sensor_s5k3l1yx_data = {
 	.sensor_type          = BAYER_SENSOR,
 	.actuator_info    = &msm_act_main_cam_2_info,
 };
-#endif //ORG_VER
+#endif
 static struct platform_device msm_camera_server = {
 	.name = "msm_cam_server",
 	.id = 0,
@@ -940,7 +912,7 @@ struct i2c_board_info msm8930_camera_i2c_boardinfo[] = {
         I2C_BOARD_INFO("imx134", 0x20),
         .platform_data = &msm_camera_sensor_imx134_data,
         },
-#endif //CONFIG_IMX134
+#endif
         {
         I2C_BOARD_INFO("ov7692", 0x78),
         .platform_data = &msm_camera_sensor_ov7692_data,
@@ -965,7 +937,7 @@ struct i2c_board_info msm8930_camera_i2c_boardinfo[] = {
 	{
 	I2C_BOARD_INFO("tps61310", 0x66),
 	},
-#endif //ORG_VER
+#endif
 };
 #ifdef ORG_VER
 /* 8930 SGLTE device */
@@ -979,7 +951,7 @@ struct i2c_board_info msm8930_evt_camera_i2c_boardinfo[] = {
 	.platform_data = &msm_camera_sensor_ov9724_data,
 	},
 };
-#endif //ORG_VER
+#endif
 struct msm_camera_board_info msm8930_camera_board_info = {
 	.board_info = msm8930_camera_i2c_boardinfo,
 	.num_i2c_board_info = ARRAY_SIZE(msm8930_camera_i2c_boardinfo),
@@ -1019,7 +991,7 @@ void __init msm8930_init_cam(void)
 			cam_expander_info;
 #endif
 	}
-#endif //ORG_VER
+#endif
 	platform_device_register(&msm_camera_server);
 	platform_device_register(&msm8960_device_csiphy0);
 	platform_device_register(&msm8960_device_csiphy1);

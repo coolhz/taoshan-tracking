@@ -1,5 +1,5 @@
 /* Copyright (c) 2011-2012, The Linux Foundation. All rights reserved.
- * Copyright (C) 2012 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -21,6 +21,7 @@
 #include <linux/err.h>
 
 #include <mach/irqs.h>
+#include <mach/msm_iomap.h>
 #include <mach/scm.h>
 #include <mach/peripheral-loader.h>
 #include <mach/subsystem_restart.h>
@@ -35,7 +36,7 @@
 #include "ramdump.h"
 #include "sysmon.h"
 
-#include <mach/msm_iomap.h>
+
 extern long system_flag;
 #ifdef CONFIG_CCI_KLOG
 extern long* powerpt;
@@ -48,11 +49,9 @@ extern void *restart_reason;
 #define CONFIG_WARMBOOT_NONE        0x00000000
 #define CONFIG_WARMBOOT_NORMAL     	0x77665501
 
-
 #ifdef CONFIG_CCI_KLOG
 #include <linux/cciklog.h>
-#endif // #ifdef CONFIG_CCI_KLOG
-
+#endif
 
 #define SCM_Q6_NMI_CMD                  0x1
 #define MODULE_NAME			"lpass_8960"
@@ -122,8 +121,8 @@ static void lpass_log_failure_reason(void)
 #ifdef CCI_KLOG_CRASH_SIZE
 #if CCI_KLOG_CRASH_SIZE
 	set_fault_state(0x5, -1, "lpass");
-#endif // #if CCI_KLOG_CRASH_SIZE
-#endif // #ifdef CCI_KLOG_CRASH_SIZE
+#endif
+#endif
 
 
 	reason = smem_get_entry(SMEM_SSR_REASON_LPASS0, &size);

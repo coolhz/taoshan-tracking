@@ -3,7 +3,7 @@
 *   it under the terms of the GNU General Public License as published by
 *   the Free Software Foundation; either version 2 of the License, or
 *   (at your option) any later version. 
-* Copyright (C) 2012 Sony Mobile Communications AB.
+* Copyright (C) 2014 Sony Mobile Communications AB.
 *
 *   This program is distributed in the hope that it will be useful,
 *   but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -34,10 +34,6 @@
 #include <linux/skbuff.h>
 #include <linux/wakelock.h>
 #include <mach/gpio.h>
-
-//#include <mach/regs-gpio.h>
-//#include <mach/gpio.h>
-//#include <mach/irqs.h>
 
 enum tsl277x_regs {
 	TSL277X_ENABLE,
@@ -145,7 +141,7 @@ struct taos_als_info {
 	u32 cpl;
 	u32 saturation;
 	int lux;
-	int ga;			//20120829
+	int ga;
 };
 
 struct taos_prox_info {
@@ -309,8 +305,7 @@ static void taos_calc_cpl(struct tsl2772_chip *chip)
 	u8 atime = chip->shadow[TSL277X_ALS_TIME];
 	u8 agl = (chip->shadow[TSL277X_CONFIG] & TSL277X_ALS_AGL_MASK)
 			>> TSL277X_ALS_AGL_SHIFT;
-	u32 time_scale = (256 - atime ) * 2730 / 600;   //2730 =2.73*1000  ( CPL 放大 1000倍 ）
-	
+	u32 time_scale = (256 - atime ) * 2730 / 600;   // 2730 =2.73*1000
 
 	cpl = time_scale * chip->params.als_gain;
 	if (agl)
@@ -433,45 +428,11 @@ static int taos_get_lux(struct tsl2772_chip *chip)
 		goto exit;
 	}
 
-	lux_0 = (u64)(( ( (c0 * 100 ) - (c1 * 187 ) ) * 10 ) / cpl); //( CPL 已經放大 1000 ） 
+	lux_0 = (u64)(( ( (c0 * 100 ) - (c1 * 187 ) ) * 10 ) / cpl);
 	lux_1 = (u64)(( ( (c0 *  63 ) - (c1 * 100 ) ) * 10 ) / cpl); 
 	lux = max(lux_0, lux_1);
 	lux = max(lux , (u32)0);
-	/*if( chip->als_inf.ga <= 0 ) 						//20120829	cal
-		chip->als_inf.ga = 1 ;
-	*/
 
-	//lux = (lux * chip->als_inf.ga) / 4096;						//20120829	cal
-
-/*	lux_0 = k0 * (s64)c0;
-	lux_1 = k1 * (s64)c1;
-	if (lux_1 >= lux_0) {
-		dev_dbg(&chip->client->dev, "%s: negative result - darkness\n",
-				__func__);
-		lux = 0;
-		goto exit;
-	}
-	lux_0 -= lux_1;
-	while (lux_0 & ((u64)0xffffffff << 32)) {				// lux0 & ( 0xFFFF FFFF << 32 )
-		dev_dbg(&chip->client->dev, "%s: overwlow lux64 = 0x%16llx",
-				__func__, lux_0);
-		lux_0 >>= 1;
-		cpl >>= 1;
-	}
-
-	if (!cpl) {
-		dev_dbg(&chip->client->dev, "%s: zero cpl - darkness\n",
-				__func__);
-		lux = 0;
-		goto exit;
-	}
-*/
-
-/*
-	lux = lux_0;								//lux0 = 11283680H 
-	lux = lux / cpl;
-*/
-							//LUX = 17883 or 1120031  
 exit:
 	dev_dbg(&chip->client->dev, "%s: lux %u (%u x %u - %u x %u) / %u\n",
 		__func__, lux, k0, c0, k1, c1, cpl);
@@ -656,24 +617,19 @@ static void report_als(struct tsl2772_chip *chip)
 static int taos_check_and_report(struct tsl2772_chip *chip)
 {
 	u8 status = chip->shadow[TSL277X_ENABLE];
-	int ret = taos_read_all(chip); 	//READ STATUS~PROX_HI
-	if (ret)			//讀值正常 ret = 0 則不進入
+	int ret = taos_read_all(chip); 	//READ STATUS
+	if (ret)
 		goto exit_clr;
 
 	status = chip->shadow[TSL277X_STATUS];
 	dev_dbg(&chip->client->dev, "%s: status 0x%02x\n", __func__, status);
 
-	//if ((status & (TSL277X_ST_PRX_VALID | TSL277X_ST_PRX_IRQ)) ==
-	//		(TSL277X_ST_PRX_VALID | TSL277X_ST_PRX_IRQ)) {
 	if(chip->prx_enabled){
 		
 		taos_get_prox(chip);
 		report_prox(chip);
 		update_prox_thresh(chip, 0);
 	}
-
-	//if ((status & (TSL277X_ST_ALS_VALID | TSL277X_ST_ALS_IRQ)) ==
-	//		(TSL277X_ST_ALS_VALID | TSL277X_ST_ALS_IRQ)) {
 	if(chip->als_enabled){
 		taos_get_als(chip);
 		taos_get_lux(chip);
@@ -694,25 +650,19 @@ static irqreturn_t taos_irq(int irq, void *handle)
 	if(chip->irq_pending)
 		return IRQ_HANDLED;
 
-	//disable_irq_nosync(chip->client->irq);
-	//wake_lock_timeout(&chip->w_lock, 0.5*HZ);
-
 	mutex_lock(&chip->lock);
 	if (chip->in_suspend) {
 		dev_dbg(dev, "%s: in suspend\n", __func__);
 		printk("\n [andy_test] %s in suspend, detect=%d\n", __FUNCTION__,chip->prx_inf.detected);
 		wake_lock_timeout(&chip->w_lock, 2*HZ);
 		chip->irq_pending = 1;
-		//disable_irq_nosync(chip->client->irq);
 		goto bypass;
 	}else{
-		schedule_work(&chip->imwork);//HY,test
+		schedule_work(&chip->imwork);
 	}
 	dev_dbg(dev, "%s\n", __func__);
-	//(void)taos_check_and_report(chip);
 bypass:
 	mutex_unlock(&chip->lock);
-	//enable_irq(chip->client->irq);
 	return IRQ_HANDLED;
 }
 
@@ -745,15 +695,13 @@ static void set_pltf_settings(struct tsl2772_chip *chip)
 		sh[TSL277X_CONFIG] = 0;
 		
 		if(cci_board_type >= DVT3_1_BOARD_HW_ID ){
-			sh[TSL277X_PRX_PULSE_COUNT] = 50;//new
+			sh[TSL277X_PRX_PULSE_COUNT] = 50;
 		}else{
-			sh[TSL277X_PRX_PULSE_COUNT] = 70;//ori
+			sh[TSL277X_PRX_PULSE_COUNT] = 70;
 		}
 
 		sh[TSL277X_CONTROL] = AGAIN_8 | PGAIN_1 |
 				PDIOD_CH0 | PDRIVE_120MA;
-		/*sh[TSL277X_CONTROL] = AGAIN_8 | PGAIN_4 |
-				PDIOD_CH0 | PDRIVE_120MA;*/
 		sh[TSL277X_REG_PRX_OFFS] = 0;
 
 		if (chip->blog)
@@ -796,7 +744,6 @@ static int flush_regs(struct tsl2772_chip *chip)
 int get_defult_ga(void)
 {
 	int ret = golden_ga;
-	//int cci_board_type = board_type_with_hw_id();
 	
 	return ret;
 }
@@ -807,20 +754,17 @@ static int TSL2772_load_kvalue(struct tsl2772_chip *chip)
 	struct file *fp = NULL;
 	char buf[16] = {0};
 	int ret = 0;
-	//printk("\n [andy_test] %s entering\n", __FUNCTION__);
 	
 	fp = filp_open("/persist/lux_ga", O_RDONLY, 0);	
 	{
 		int iga = 3750;	
 		if(IS_ERR(fp))
 		{
-			//return -1;
 		}
-		else//if (NULL != fp)
+		else
 		{
 			if(fp->f_op->read == NULL)
 			{
-				//return -1;
 			}
 			else
 			{
@@ -836,7 +780,6 @@ static int TSL2772_load_kvalue(struct tsl2772_chip *chip)
 		}
 		chip->als_inf.ga = (0 == iga)?3750:iga;
 		printk("\n [andy_test] ga = %d \n", chip->als_inf.ga);
-		//TSL2771_calibration_wait_ga(iga);
 	}
 	
 	fp = filp_open("/persist/prox_pilth", O_RDONLY, 0);
@@ -844,13 +787,11 @@ static int TSL2772_load_kvalue(struct tsl2772_chip *chip)
 		int ihigh = 0;
 		if(IS_ERR(fp))
 		{
-	  		//return -1;
 		}
-		else //if (NULL != fp)	
+		else	
 		{
 			if(NULL == fp->f_op->read)
 			{
-				//return -1;
 			}
 			else
 			{
@@ -860,6 +801,7 @@ static int TSL2772_load_kvalue(struct tsl2772_chip *chip)
 				ihigh = simple_strtol(buf, NULL, 10);
 				memset(buf, 0, 16);
 				set_fs(old_fs);
+
 				filp_close(fp, NULL);
 				fp = NULL;
 			}
@@ -873,14 +815,12 @@ static int TSL2772_load_kvalue(struct tsl2772_chip *chip)
 		int ilow = 0;
 		if(IS_ERR(fp))
 		{
-	  		//return -1;
 		}
-		else //if (NULL != fp)
+		else
 		{
 			if(fp->f_op->read== NULL)
 			{
 				printk("read file error \n");
-				//return -1;
 			}
 			else
 			{
@@ -929,8 +869,6 @@ static int update_enable_reg(struct tsl2772_chip *chip)
 			case 3:
 				break;
 			default:
-					//chip->params.prox_th_max;
-					//chip->params.prox_th_min;
 				break;
 			}
 		}
@@ -968,7 +906,6 @@ static int taos_prox_enable(struct tsl2772_chip *chip, int on)
 				chip->wake_irq = 0;
 				printk("\n [andy_test] %s ,irq_set_irq_wake\n", __FUNCTION__);
 			}
-			//disable_irq_nosync(chip->client->irq);
 			disable_irq(chip->client->irq);
 		}
 	}
@@ -1010,7 +947,7 @@ static int taos_als_enable(struct tsl2772_chip *chip, int on)
 	return rc;
 }
 
-static int taos_device_prx_cal_avg_10(struct tsl2772_chip *chip) //20120829
+static int taos_device_prx_cal_avg_10(struct tsl2772_chip *chip)
 {
 // add retry mechanism
 #if 0
@@ -1019,7 +956,7 @@ static int taos_device_prx_cal_avg_10(struct tsl2772_chip *chip) //20120829
 	int	i = 10;
 	u8 *buf = &chip->shadow[TSL277X_PRX_LO];
 	
-	for( ; i>0 ; i--)			// PROX  當無物體接近時 得繞射值 10次平均 
+	for( ; i>0 ; i--)
 	{
 		ret = taos_i2c_blk_read(chip, TSL277X_PRX_LO,
 					&chip->shadow[TSL277X_PRX_LO],2);  
@@ -1029,11 +966,11 @@ static int taos_device_prx_cal_avg_10(struct tsl2772_chip *chip) //20120829
 			return ret;
 			
 		msleep(3);	 		   // DELAY 3ms 
-		p_avg += chip->prx_inf.raw;											   //PDATA 累加 
+		p_avg += chip->prx_inf.raw;
 	} 
 	p_avg /= 10;
-	
-	return 	p_avg;														   // 	
+
+	return 	p_avg;
 #else
 	int ret = 0;
 	int p_avg = 0 ;
@@ -1045,25 +982,24 @@ static int taos_device_prx_cal_avg_10(struct tsl2772_chip *chip) //20120829
 
 	printk("\n [andy_test] %s starts\n", __FUNCTION__);
 	
-	for ( ; iRetry <  nRetry && iCalibrate < nCalibrate; iRetry++)			// PROX  當無物體接近時 得繞射值 10次平均 
+	for ( ; iRetry <  nRetry && iCalibrate < nCalibrate; iRetry++)
 	{
 		ret = taos_i2c_blk_read(chip, TSL277X_PRX_LO,
 					&chip->shadow[TSL277X_PRX_LO],2);  
 
 		if(ret < 0) {
-			printk("\n [andy_test] %s taos_i2c_blk_read() failed. ret=%d\n", __FUNCTION__, ret);
+		printk("\n [andy_test] %s taos_i2c_blk_read() failed. ret=%d\n", __FUNCTION__, ret);
 			msleep(3);
 			continue;  // fail to cailbrate!
-			//return ret;
 		}
 		
 		chip->prx_inf.raw = (buf[1] << 8) | buf[0];
 		if (chip->prx_inf.raw <= 0)
-			printk("\n [andy_test] %s chip->prx_inf.raw=%d\n", __FUNCTION__, chip->prx_inf.raw);
+		printk("\n [andy_test] %s chip->prx_inf.raw=%d\n", __FUNCTION__, chip->prx_inf.raw);
 
 			
 		msleep(3);	 		   // DELAY 3ms 
-		p_avg += chip->prx_inf.raw;											   //PDATA 累加 
+		p_avg += chip->prx_inf.raw;
 
 		iCalibrate++;  // successfully calibrate!
 	} 
@@ -1081,12 +1017,12 @@ static int taos_device_prx_cal_avg_10(struct tsl2772_chip *chip) //20120829
 }
 
 static ssize_t taos_device_prx_offset_cal(struct device *dev,			
-				   struct device_attribute *attr, char *buf)	//20120829
+	struct device_attribute *attr, char *buf)
 {
 	int p_avg = 0 ;	
 	int ret = 0; 
-	int prox_offset = 0;							  							//prox_offset = 寫入 OFFSET 的 DATA
-	int prox_cross_talk = 400;						  							// 設定 欲定的繞射值(maybe change)
+	int prox_offset = 0;
+	int prox_cross_talk = 400;
 	int cci_board_type = board_type_with_hw_id();
 
 		if(cci_board_type >= DVT3_1_BOARD_HW_ID )
@@ -1097,23 +1033,23 @@ static ssize_t taos_device_prx_offset_cal(struct device *dev,
 		prox_cross_talk = 400;
 	
 	mutex_lock(&chip->lock);	
-	p_avg = taos_device_prx_cal_avg_10(chip);	//呼叫上方的 " taos_device_prx_cal_avg_10 " 副程式
-	if(p_avg < 0 )					//如果 i2c fail 則跳開 
+	p_avg = taos_device_prx_cal_avg_10(chip);
+	if(p_avg < 0 )
 		goto exit_prox_offset_cal;
 
 	if(p_avg > prox_cross_talk)
 	{
-		while(p_avg > prox_cross_talk)			//如果P-DATA >  prox_cross_talk
+		while(p_avg > prox_cross_talk)
 		{	 
 			ret =0;
-			prox_offset += 1;					// 這裡 OFFSET +1 可將 	P-DATA 往下降
+			prox_offset += 1;
 			ret = taos_i2c_write(chip, TSL277X_REG_PRX_OFFS, prox_offset);
 			msleep(3);	 		   // DELAY 3ms 
-			p_avg = taos_device_prx_cal_avg_10(chip);	//呼叫最上方的prox_avg副程式
-			if(p_avg < 0 )					//如果 i2c fail 則跳開 
+			p_avg = taos_device_prx_cal_avg_10(chip);
+			if(p_avg < 0 )	
 				goto exit_prox_offset_cal;
 
-			if(prox_offset == 127)	   //0x7FH // 如果減到極限就跳出     ( OFFSET 的第7個 BIT 是選擇 OFFSET 是加還是減
+			if(prox_offset == 127)
 			{
 				goto boundary;
 			}
@@ -1121,15 +1057,15 @@ static ssize_t taos_device_prx_offset_cal(struct device *dev,
 	}
 	else
 	{
-		prox_offset = 128; // = 0X80H		//以下為 OFFSET 以加的方式做,同上方減的FOR 迴圈 
+		prox_offset = 128;
 		while(chip->prx_inf.raw < prox_cross_talk)
 		{	 
 			ret = 0;
 			prox_offset += 1;
 			ret = taos_i2c_write(chip, TSL277X_REG_PRX_OFFS, prox_offset);
-			msleep(3);	 		 					// DELAY 3ms 
-			p_avg = taos_device_prx_cal_avg_10(chip);	//呼叫最上方的prox_avg副程式
-			if(p_avg < 0 )					//如果 i2c fail 則跳開 
+			msleep(3);	// DELAY 3ms 
+			p_avg = taos_device_prx_cal_avg_10(chip);
+			if(p_avg < 0 )
 				goto exit_prox_offset_cal;
 		
 			if(prox_offset == 255)
@@ -1140,8 +1076,8 @@ static ssize_t taos_device_prx_offset_cal(struct device *dev,
 	}
 
 boundary:
-	ret = taos_i2c_write(chip, TSL277X_REG_PRX_OFFS, prox_offset);			//TSL2771_calibration_prox_wait_offset(prox_offset);
-	
+	ret = taos_i2c_write(chip, TSL277X_REG_PRX_OFFS, prox_offset);
+
 exit_prox_offset_cal:
 	mutex_unlock(&chip->lock);
 	if(ret < 0)
@@ -1169,7 +1105,7 @@ static ssize_t taos_device_prx_pilth_store(struct device *dev,
 }
 
 static ssize_t taos_device_prx_pilth_cal(struct device *dev,	
-	struct device_attribute *attr, char *buf)		//20120829
+	struct device_attribute *attr, char *buf)
 {
 	struct tsl2772_chip *chip = dev_get_drvdata(dev);
 	int p_avg = 0 ;
@@ -1177,11 +1113,10 @@ static ssize_t taos_device_prx_pilth_cal(struct device *dev,
 	
     mutex_lock(&chip->lock);
 
-	p_avg = taos_device_prx_cal_avg_10(chip);	//呼叫最上方的prox_avg副程式
-	if(p_avg < 0 )					//如果 i2c fail 則跳開 
+	p_avg = taos_device_prx_cal_avg_10(chip);
+	if(p_avg < 0 )
 		goto exit_prx_pilth_cal;
-														   // 得到 10 次平均 
-	//chip->shadow[TSL277X_PRX_MAXTHRESHLO] = p_avg + 300;//400 ;	// 將 繞射值固定加 400 & 200 設為 上下限值 
+
 	switch(chip->Panel_ID)
 	{
 	case 0:
@@ -1189,7 +1124,6 @@ static ssize_t taos_device_prx_pilth_cal(struct device *dev,
 	case 2:
 	case 3:
 // all kinds of panel ID shall utilize the value of ADC
-//		break;
 	default:
 		if(cci_board_type >= DVT3_1_BOARD_HW_ID )
 			chip->params.prox_th_max = p_avg + 500;  // new threshold high
@@ -1198,9 +1132,8 @@ static ssize_t taos_device_prx_pilth_cal(struct device *dev,
 		else
 			chip->params.prox_th_max = p_avg + 400;  // new threshold high
 		break;
-	}								
-	//ret = taos_i2c_blk_write(chip, TSL277X_PRX_MAXTHRESHLO, &chip->shadow[TSL277X_PRX_MAXTHRESHLO], 2);
-	
+	}
+
 exit_prx_pilth_cal:
 
 	// reserve 1023 for 0-cm condition
@@ -1208,7 +1141,7 @@ exit_prx_pilth_cal:
 		chip->params.prox_th_max = 1022;  // set max to 1022
 
 	mutex_unlock(&chip->lock);
-	return snprintf(buf, PAGE_SIZE, "%d\n", chip->params.prox_th_max/*chip->shadow[TSL277X_PRX_MAXTHRESHLO]*/);
+	return snprintf(buf, PAGE_SIZE, "%d\n", chip->params.prox_th_max);
 }
 
 static ssize_t taos_device_prx_piltl_store(struct device *dev,
@@ -1230,18 +1163,17 @@ static ssize_t taos_device_prx_piltl_store(struct device *dev,
 }
 
 static ssize_t taos_device_prx_piltl_cal(struct device *dev,
-	struct device_attribute *attr, char *buf)		//20120829
+	struct device_attribute *attr, char *buf)
 {
 	struct tsl2772_chip *chip = dev_get_drvdata(dev);
 	int p_avg = 0 ;
 	
 	mutex_lock(&chip->lock);
 		
-	p_avg = taos_device_prx_cal_avg_10(chip);	//呼叫最上方的prox_avg副程式
-	if(p_avg < 0 )					//如果 i2c fail 則跳開 
+	p_avg = taos_device_prx_cal_avg_10(chip);
+	if(p_avg < 0 )
 		goto exit_prx_piltl_cal;
-															   // 得到 10 次平均 
-	//chip->shadow[TSL277X_PRX_MINTHRESHLO] = p_avg + 80;//200 ;	// 將 繞射值固定加 400 & 200 設為 上下限值 
+
 	switch(chip->Panel_ID)
 	{
 	case 0:
@@ -1249,19 +1181,17 @@ static ssize_t taos_device_prx_piltl_cal(struct device *dev,
 	case 2:
 	case 3:
 // all kinds of panel ID shall utilize the value of ADC
-//		break;
 	default:
 		chip->params.prox_th_min = p_avg + 90;
 		break;
 	}
-	//ret = taos_i2c_blk_write(chip, TSL277X_PRX_MINTHRESHLO, &chip->shadow[TSL277X_PRX_MINTHRESHLO], 2);
 	
 	if (chip->params.prox_th_min > 1022)
 		chip->params.prox_th_min = 1022;  // set max to 1022
 			
 exit_prx_piltl_cal:
 	mutex_unlock(&chip->lock);
-	return snprintf(buf, PAGE_SIZE, "%d\n", chip->params.prox_th_min/*chip->shadow[TSL277X_PRX_MINTHRESHLO]*/);
+	return snprintf(buf, PAGE_SIZE, "%d\n", chip->params.prox_th_min);
 }
 
 static ssize_t taos_device_prx_store(struct device *dev,
@@ -1322,7 +1252,6 @@ static ssize_t taos_device_prx_reset_store(struct device *dev,
 {
 	struct tsl2772_chip *chip = dev_get_drvdata(dev);
 	unsigned long value;
-	//int cci_board_type = board_type_with_hw_id();
 	
 	if (strict_strtoul(buf, 0, &value))
 		return -EINVAL;
@@ -1355,7 +1284,7 @@ static ssize_t taos_device_prx_reset_store(struct device *dev,
 }
 
 static ssize_t taos_device_prx_cal(struct device *dev,
-	struct device_attribute *attr, char *buf)		//20120829
+	struct device_attribute *attr, char *buf)
 {
 	struct tsl2772_chip *chip = dev_get_drvdata(dev);
 	int p_avg = 0 ;
@@ -1363,11 +1292,10 @@ static ssize_t taos_device_prx_cal(struct device *dev,
 	
 	mutex_lock(&chip->lock);
 		
-	p_avg = taos_device_prx_cal_avg_10(chip);	//呼叫最上方的prox_avg副程式
-	if(p_avg < 0 )					//如果 i2c fail 則跳開 
+	p_avg = taos_device_prx_cal_avg_10(chip);
+	if(p_avg < 0 )
 		goto exit_prx_piltl_cal;
-															   // 得到 10 次平均 
-	//chip->shadow[TSL277X_PRX_MINTHRESHLO] = p_avg + 80;//200 ;	// 將 繞射值固定加 400 & 200 設為 上下限值 
+
 	switch(chip->Panel_ID)
 	{
 	case 0:
@@ -1375,7 +1303,6 @@ static ssize_t taos_device_prx_cal(struct device *dev,
 	case 2:
 	case 3:
 // all kinds of panel ID shall utilize the value of ADC
-//		break;
 	default:
 		chip->params.prox_th_min = p_avg + 90;
 		
@@ -1393,7 +1320,6 @@ static ssize_t taos_device_prx_cal(struct device *dev,
 			chip->params.prox_th_max = 1022;  // set max to 1022
 		break;
 	}
-	//ret = taos_i2c_blk_write(chip, TSL277X_PRX_MINTHRESHLO, &chip->shadow[TSL277X_PRX_MINTHRESHLO], 2);
 	
 exit_prx_piltl_cal:
 	mutex_unlock(&chip->lock);
@@ -1419,11 +1345,11 @@ static ssize_t taos_device_als_cal_ga_store(struct device *dev,
 }
 
 static ssize_t taos_device_als_cal_ga(struct device *dev,	
-				   struct device_attribute *attr, char *buf)	//20120829
+				   struct device_attribute *attr, char *buf)
 {
 	int rc=0;	
 	int ret = 0;
- 	int calibration_lux_default = 500;	   // 校正用標準光源 = 500 LUX
+ 	int calibration_lux_default = 500;	   // default is 500 LUX
 	u32 ch0, ch1;
 	u8 *sbuf = &chip->shadow[TSL277X_ALS_CHAN0LO];
 	int lux = 0;
@@ -1431,7 +1357,7 @@ static ssize_t taos_device_als_cal_ga(struct device *dev,
 	mutex_lock(&chip->lock);													     
 
 	ret = taos_i2c_blk_read(chip, TSL277X_ALS_CHAN0LO,
-				&chip->shadow[TSL277X_ALS_CHAN0LO],4);  //	讀出  CLEAR & IR DATA	
+				&chip->shadow[TSL277X_ALS_CHAN0LO],4);
 				    
 	ch0 = le16_to_cpup((const __le16 *)&sbuf[0]); 
 	ch1 = le16_to_cpup((const __le16 *)&sbuf[2]);
@@ -1444,17 +1370,16 @@ static ssize_t taos_device_als_cal_ga(struct device *dev,
 		
 		for (i= 0; i<5; i++)
 		{
-			rc = taos_get_lux(chip);		//若 taos_get_lux 正常,rc = 0
+			rc = taos_get_lux(chip);
 			value += chip->als_inf.lux;	
 			msleep(3);
 		}
 	
 		if (!rc) {
-			lux = value / 5;//chip->als_inf.lux;
-			update_als_thres(chip, 0);	//修改對應的 TH_HI & TH_LOW
+			lux = value / 5;
+			update_als_thres(chip, 0);
 		} else {
 			update_als_thres(chip, 1);
-			//chip->als_inf.ga = 3750;
 			printk("\n [andy_test] %s read fail \n", __func__);
 			goto exit_als_cal_ga;	
 		}
@@ -1467,7 +1392,7 @@ static ssize_t taos_device_als_cal_ga(struct device *dev,
 	}
 	else
 	{
-		chip->als_inf.ga = ( calibration_lux_default * 4096) / lux;	// 計算 LUX 須乘 GA = ? 才能得到 500 LUX
+		chip->als_inf.ga = ( calibration_lux_default * 4096) / lux;
 	}
 											
 exit_als_cal_ga:
@@ -1526,19 +1451,6 @@ static ssize_t taos_lux_table_store(struct device *dev,
 				struct device_attribute *attr,
 				const char *buf, size_t size)
 {
-	/*struct tsl2772_chip *chip = dev_get_drvdata(dev);
-	int i;
-	u32 ratio, k0, k1;
-
-	if (4 != sscanf(buf, "%10d:%10u,%10u,%10u", &i, &ratio, &k0, &k1))
-		return -EINVAL;
-	if (i >= chip->segment_num)
-		return -EINVAL;
-	mutex_lock(&chip->lock);
-	chip->segment[i].ratio = (ratio << RATIO_SHIFT) / 1000;
-	chip->segment[i].k0 = (k0 << SCALE_SHIFT) / 1000;
-	chip->segment[i].k1 = (k1 << SCALE_SHIFT) / 1000;
-	mutex_unlock(&chip->lock);*/
 	return size;
 }
 
@@ -1602,7 +1514,7 @@ static ssize_t tsl2772_als_enable(struct device *dev,
 
 	if (value){
 		taos_als_enable(chip,1);
-		taos_check_and_report(chip);//report immediately
+		taos_check_and_report(chip); //report immediately
 
 		if (chip->blog)
 		printk("\n [andy_test] %s end\n", __FUNCTION__);
@@ -1635,7 +1547,7 @@ static ssize_t tsl2772_prox_enable(struct device *dev,
 
 	if (value){
 		taos_prox_enable(chip,1);
-		taos_check_and_report(chip);//report immediately
+		taos_check_and_report(chip); //report immediately
 
 		if (chip->blog)
 		printk("\n [andy_test] %s end\n", __FUNCTION__);
@@ -1731,18 +1643,18 @@ static ssize_t TSL2772_K_show(struct device *dev,
 static struct device_attribute prox_attrs[] = {
 	__ATTR(prx_raw, 0444, taos_device_prx_raw, NULL),
 	__ATTR(prx_detect, 0444, taos_device_prx_detected, NULL),
-	__ATTR(prox_offset, 0444, taos_device_prx_offset_cal, NULL), 	//加入下方3行//20120829
-	__ATTR(prox_pilth, 0644, taos_device_prx_pilth_cal, taos_device_prx_pilth_store),	//20120829
-	__ATTR(prox_piltl, 0644, taos_device_prx_piltl_cal, taos_device_prx_piltl_store),	//20120829
-	__ATTR(prox_cal, 0644, taos_device_prx_cal, taos_device_prx_store),	//20121225
-	__ATTR(prox_reset, 0644, taos_device_prx_reset, taos_device_prx_reset_store),	//20120223
+	__ATTR(prox_offset, 0444, taos_device_prx_offset_cal, NULL),
+	__ATTR(prox_pilth, 0644, taos_device_prx_pilth_cal, taos_device_prx_pilth_store),
+	__ATTR(prox_piltl, 0644, taos_device_prx_piltl_cal, taos_device_prx_piltl_store),
+	__ATTR(prox_cal, 0644, taos_device_prx_cal, taos_device_prx_store),
+	__ATTR(prox_reset, 0644, taos_device_prx_reset, taos_device_prx_reset_store),
 };
 
 static struct device_attribute als_attrs[] = {
 	__ATTR(als_ch0, 0444, taos_device_als_ch0, NULL),
 	__ATTR(als_ch1, 0444, taos_device_als_ch1, NULL),
 	__ATTR(als_cpl, 0444, taos_device_als_cpl, NULL),
-	__ATTR(lux_ga, 0644, taos_device_als_cal_ga, taos_device_als_cal_ga_store),		//20120829
+	__ATTR(lux_ga, 0644, taos_device_als_cal_ga, taos_device_als_cal_ga_store),
 	__ATTR(als_lux, 0444, taos_device_als_lux, NULL),
 	__ATTR(als_gain, 0644, taos_als_gain_show, taos_als_gain_store),
 	__ATTR(als_gate, 0644, taos_als_gate_show, taos_als_gate_store),
@@ -1800,7 +1712,6 @@ static int prox_idev_open(struct input_dev *idev)
 {
 	struct tsl2772_chip *chip = dev_get_drvdata(&idev->dev);
 	int rc = 0;
-	//bool als = chip->a_idev && chip->a_idev->users;
 	dev_dbg(&idev->dev, "%s\n", __func__);
 	mutex_lock(&chip->lock);
 	if (chip->unpowered) {
@@ -1808,9 +1719,6 @@ static int prox_idev_open(struct input_dev *idev)
 		if (rc)
 			goto chip_on_err;
 	}
-	//rc = taos_prox_enable(chip, 1);
-	//if (rc && !als)
-	//	pltf_power_off(chip);
 chip_on_err:
 	mutex_unlock(&chip->lock);
 	return rc;
@@ -1832,7 +1740,6 @@ static int als_idev_open(struct input_dev *idev)
 {
 	struct tsl2772_chip *chip = dev_get_drvdata(&idev->dev);
 	int rc = 0;
-	//bool prox = chip->p_idev && chip->p_idev->users;
 
 	dev_dbg(&idev->dev, "%s\n", __func__);
 	mutex_lock(&chip->lock);
@@ -1841,9 +1748,6 @@ static int als_idev_open(struct input_dev *idev)
 		if (rc)
 			goto chip_on_err;
 	}
-	//rc = taos_als_enable(chip, 1);
-	//if (rc && !prox)
-	//	pltf_power_off(chip);
 chip_on_err:
 	mutex_unlock(&chip->lock);
 	return rc;
@@ -1883,7 +1787,6 @@ static int __devinit taos_probe(struct i2c_client *client,
 	int i, ret;
 	u8 id, rev;
 	struct device *dev = &client->dev;
-//	static struct tsl2772_chip *chip;
 	struct tsl2772_i2c_platform_data *pdata = dev->platform_data;
 	bool powered = 0;
 
@@ -2111,7 +2014,6 @@ static int taos_suspend(struct device *dev)
 		}
 	}
 	if (chip->wake_irq) {
-		//enable_irq(chip->client->irq);
 		irq_set_irq_wake(chip->client->irq, 1);
 		chip->prx_inf.detected = 1;
 		update_prox_thresh(chip, false);
@@ -2147,10 +2049,7 @@ static int taos_resume(struct device *dev)
 	if (chip->wake_irq) {
 		int rt = irq_set_irq_wake(chip->client->irq, 0);
 		chip->wake_irq = 0;
-		//(void)taos_check_and_report(chip);
 		rt = taos_irq_clr(chip, TSL277X_CMD_PROX_INT_CLR);
-		//disable_irq_nosync(chip->client->irq);
-		//wake_lock_timeout(&chip->w_lock, 2*HZ);
 	}
 	if (chip->unpowered && (prx_on || als_on)) {
 		dev_dbg(dev, "powering on\n");
@@ -2165,8 +2064,6 @@ static int taos_resume(struct device *dev)
 	if (chip->irq_pending) {
 		dev_dbg(dev, "%s: pending interrupt\n", __func__);
 		chip->irq_pending = 0;
-		//(void)taos_check_and_report(chip);
-		//enable_irq(chip->client->irq);
 	}
 err_power:
 	mutex_unlock(&chip->lock);

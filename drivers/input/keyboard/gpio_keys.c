@@ -32,20 +32,20 @@
 
 #include <linux/wakelock.h>
 /*---------------------  Static Definitions -------------------------*/
-#define BOOT_DEBUG 1   //0:disable, 1:enable . for boot info
+#define BOOT_DEBUG 1
 #if(BOOT_DEBUG)
     #define PrintAA(string, args...)    printk("KEY_BOOT(K)=> "string, ##args);
 #else
     #define PrintAA(string, args...)
 #endif
 
-#define ENGINE_DEBUG 0  //0:disable, 1:enable. for enginer debug
+#define ENGINE_DEBUG 0
 #if(ENGINE_DEBUG)
     #define Printlog(string, args...)    printk("KEY_ENG(K)=> "string, ##args);
 #else
     #define Printlog(string, args...)
 #endif
-#define IRQ_DEBUG 0  //0:disable, 1:enable. for IRQ debug
+#define IRQ_DEBUG 0
 
 struct gpio_button_data {
 	const struct gpio_keys_button *button;
@@ -352,12 +352,12 @@ void HWKEY_vCheckEnterRamDump(void)
 {
     int iData1 =-1,iData2 = -1, iData3 = -1;
 if(camera_ctrl)
-    iData2 = gpio_get_value(69);    // camera key
+    iData2 = gpio_get_value(69);    // camera key button
 else
-    iData2 = gpio_get_value(68);    // camera key
-    iData3 = gpio_get_value(47);    //vol-down
+    iData2 = gpio_get_value(68);    // camera key button
+    iData3 = gpio_get_value(47);    // vol-down button
 
-    iData1 = gpio_get_value(48);    //vol-up
+    iData1 = gpio_get_value(48);    // vol-up button
 
     Printlog("[%s] (gpio-68/69)=%d..\n", __FUNCTION__, iData2);
     Printlog("[%s] (gpio-47)=%d..\n", __FUNCTION__, iData3);
@@ -386,7 +386,7 @@ static void gpio_keys_gpio_report_event(struct gpio_button_data *bdata)
 		input_event(input, type, button->code, !!state);
 		PrintAA("gpio-keys code:%d  state:%d \n",button->code,!!state);
 #ifdef CCI_HWKEY_ALLOW_FORCE_PANIC
-		HWKEY_vCheckEnterRamDump();		//use Volume up+ down + Camera key to ramdump !
+	HWKEY_vCheckEnterRamDump();	// use Volume up+ down + Camera key to ramdump !
 #endif
 	}
 	input_sync(input);
@@ -404,9 +404,7 @@ static void gpio_keys_gpio_timer(unsigned long _data)
 {
 	struct gpio_button_data *bdata = (struct gpio_button_data *)_data;
 	Printlog("[%s] \n",__func__);
-//
-//hh, 20130613,[] implement-volumeKey-whileMakeACall.
-//
+
 #if 0
 	if(bdata->button->wakeup)
 #endif
@@ -535,7 +533,7 @@ static int __devinit gpio_keys_setup_key(struct platform_device *pdev,
 			    gpio_keys_gpio_timer, (unsigned long)bdata);
 
 		isr = gpio_keys_gpio_isr;
-                 wake_lock_init(&bdata->gpio_keys_wake_lock, WAKE_LOCK_SUSPEND, "gpio_keys_wake_lock");
+        wake_lock_init(&bdata->gpio_keys_wake_lock, WAKE_LOCK_SUSPEND, "gpio_keys_wake_lock");
 		irqflags = IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING;
 
 	} else {

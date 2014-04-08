@@ -1,5 +1,5 @@
 /* Copyright (c) 2012-2013, The Linux Foundation. All rights reserved.
- * Copyright (C) 2012 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -179,7 +179,7 @@ static int msm8930_cfg_spkr_gpio(int gpio,
 	return ret;
 }
 
-static struct mutex cdc_mclk_mutex;  // BAM_S C 130530 [Mig:Ic9c3a6e5]
+static struct mutex cdc_mclk_mutex;
 
 static void msm8960_ext_spk_power_amp_on(u32 spk)
 {
@@ -330,14 +330,13 @@ static int msm8930_enable_codec_ext_clk(
 		struct snd_soc_codec *codec, int enable,
 		bool dapm)
 {
-	int r = 0;  // BAM_S C 130530 [Mig:Ic9c3a6e5]
+	int r = 0;
 	pr_debug("%s: enable = %d\n", __func__, enable);
 
-	mutex_lock(&cdc_mclk_mutex);  // BAM_S C 130530 [Mig:Ic9c3a6e5]
+	mutex_lock(&cdc_mclk_mutex);
 	if (enable) {
 		clk_users++;
 		pr_debug("%s: clk_users = %d\n", __func__, clk_users);
-		#if 0  // BAM_S C 130530 [Mig:Ic9c3a6e5]
 		if (clk_users != 1)
 			return 0;
 
@@ -363,9 +362,9 @@ static int msm8930_enable_codec_ext_clk(
 				r = -EINVAL;
 			}
 		}
-		#endif // BAM_E C 130530
+		#endif
 	} else {
-		#if 0  // BAM_S C 130530 [Mig:Ic9c3a6e5]
+		#if 0
 		pr_debug("%s: clk_users = %d\n", __func__, clk_users);
 		if (clk_users == 0)
 			return 0;
@@ -390,14 +389,14 @@ static int msm8930_enable_codec_ext_clk(
 			pr_err("%s: Error releasing Sitar MCLK\n", __func__);
 			r = -EINVAL;
 		}
-		#endif  // BAM_E C 130530
+		#endif
 	}
-	#if 0  // BAM_S C 130530 [Mig:Ic9c3a6e5]
+	#if 0
 	return 0;
 	#else
 	mutex_unlock(&cdc_mclk_mutex);
 	return r;
-	#endif  // BAM_E C 130530
+	#endif
 }
 
 static bool msm8930_swap_gnd_mic(struct snd_soc_codec *codec)
@@ -1632,7 +1631,7 @@ static int __init msm8930_audio_init(void)
 		pr_err("%s Fail to configure headset mic gpios\n", __func__);
 
 	atomic_set(&auxpcm_rsc_ref, 0);
-	mutex_init(&cdc_mclk_mutex);  // BAM_S C 130530 [Mig:Ic9c3a6e5]
+	mutex_init(&cdc_mclk_mutex);
 	return ret;
 
 }
@@ -1647,7 +1646,7 @@ static void __exit msm8930_audio_exit(void)
 	msm8930_free_headset_mic_gpios();
 	platform_device_unregister(msm8930_snd_device);
 	kfree(mbhc_cfg.calibration);
-	mutex_destroy(&cdc_mclk_mutex);  // BAM_S C 130530 [Mig:Ic9c3a6e5]
+	mutex_destroy(&cdc_mclk_mutex);
 }
 module_exit(msm8930_audio_exit);
 

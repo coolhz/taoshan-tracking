@@ -55,7 +55,7 @@
 
 #ifdef CONFIG_CCI_PM_SMD_RPC_LOG
 #include "../../../kernel/power/power.h"
-#endif // #ifdef CONFIG_CCI_PM_SMD_RPC_LOG
+#endif
 
 
 enum {
@@ -1567,7 +1567,7 @@ int msm_rpc_write(struct msm_rpc_endpoint *ept, void *buffer, int count)
 	{
 		printk("[SMD]send RPC call:xid=%u, prog=0x%X, proc=0x%X\n", cpu_to_be32(rq->xid), cpu_to_be32(rq->prog), cpu_to_be32(rq->procedure));
 	}
-#endif // #ifdef CONFIG_CCI_PM_SMD_SEND_RPC_CALL_LOG
+#endif
 
 		/* RPC CALL */
 		if (count < (sizeof(uint32_t) * 6)) {
@@ -1602,7 +1602,7 @@ int msm_rpc_write(struct msm_rpc_endpoint *ept, void *buffer, int count)
 	{
 		printk("[SMD]send RPC reply:xid=%u\n", cpu_to_be32(rq->xid));
 	}
-#endif // #ifdef CONFIG_CCI_PM_SMD_SEND_RPC_REPLY_LOG
+#endif
 
 		/* RPC REPLY */
 		reply = get_pend_reply(ept, rq->xid);
@@ -1905,7 +1905,7 @@ int __msm_rpc_read(struct msm_rpc_endpoint *ept,
 	{
 		printk("[SMD]receive RPC call:xid=%u, prog=0x%X, proc=0x%X\n", cpu_to_be32(rq->xid), cpu_to_be32(rq->prog), cpu_to_be32(rq->procedure));
 	}
-#endif // #ifdef CONFIG_CCI_PM_SMD_RECEIVE_RPC_CALL_LOG
+#endif
 
 		/* RPC CALL */
 		reply = get_avail_reply(ept);
@@ -1927,7 +1927,7 @@ int __msm_rpc_read(struct msm_rpc_endpoint *ept,
 	{
 		printk("[SMD]receive RPC reply:xid=%u\n", cpu_to_be32(rq->xid));
 	}
-#endif // #ifdef CONFIG_CCI_PM_SMD_RECEIVE_RPC_REPLY_LOG
+#endif
 
 
 	kfree(pkt);

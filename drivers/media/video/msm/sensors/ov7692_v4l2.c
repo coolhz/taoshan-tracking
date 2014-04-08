@@ -10,12 +10,13 @@
  * GNU General Public License for more details.
  *
  */
-#include <mach/msm_iomap.h>//2012/11/15 
-#include "msm_sensor.h"
-#include "msm_camera_i2c_mux.h"//2012/08/27
-#include "msm.h"//2013/01/28
-#define SENSOR_NAME "ov7692"
 
+#include <mach/msm_iomap.h>
+#include "msm_sensor.h"
+#include "msm_camera_i2c_mux.h"
+#include "msm.h"
+#define SENSOR_NAME "ov7692"
+// camera affects
 #define CAMERA_EFFECT_OFF		0
 #define CAMERA_EFFECT_MONO		1
 #define CAMERA_EFFECT_NEGATIVE		2
@@ -37,43 +38,34 @@
 #define CAMERA_EFFECT_MAX               18
 
 DEFINE_MUTEX(ov7692_mut);
-//B 2012/11/15 
 #define GPIO_CONFIG(gpio)         (MSM_TLMM_BASE + 0x1000 + (0x10 * (gpio)))
 #define GPIO_IN_OUT(gpio)         (MSM_TLMM_BASE + 0x1004 + (0x10 * (gpio)))
 #define MSM_OV_CAM_CLK 4
-//E 2012/11/15 
-extern int req_fps;//2013/01/28
+extern int req_fps;
 static struct msm_sensor_ctrl_t ov7692_s_ctrl;
-
+static bool power = false;
 static int effect_value = CAMERA_EFFECT_OFF;
 static unsigned int SAT_U = 0x80; /* DEFAULT SATURATION VALUES*/
 static unsigned int SAT_V = 0x80; /* DEFAULT SATURATION VALUES*/
-static bool power = false;//2012/08/27
+
 static struct msm_camera_i2c_reg_conf ov7692_start_settings[] = {
-    //{0x0e, 0x00},//2012/11/15 
-    //B 2012/09/21
     {0xff, 0x01},
     {0xb5, 0x40},
     {0xff, 0x00},
-    //E 2012/09/21
-    {0x0e, 0x00},//2012/11/15 
+    {0x0e, 0x00},
 };
 
 static struct msm_camera_i2c_reg_conf ov7692_stop_settings[] = {
 	{0x0e, 0x08},
-    //B 2012/09/21
     {0xff, 0x01},
     {0xb5, 0x70},
     {0xff, 0x00},
-    //E 2012/09/21
 };
-//B 2012/10/29
+
 static struct msm_camera_i2c_reg_conf ov7692_reset_settings[] = {
     {0x12, 0x80},
 };
-//E 2012/10/29
 static struct msm_camera_i2c_reg_conf ov7692_recommend_settings[] = {
-	//{0x12, 0x80},//2012/10/29
 	{0x0e, 0x08},
 	{0x69, 0x52},
 	{0x1e, 0xb3},
@@ -133,13 +125,11 @@ static struct msm_camera_i2c_reg_conf ov7692_recommend_settings[] = {
 	{0x86, 0x00},
 	{0x87, 0x00},
 	{0x88, 0x00},
-    //B 2013/04/15
 	{0x89, 0x24},
 	{0x8a, 0x22},
 	{0x8b, 0x1d},
 	{0xbb, 0x84},
 	{0xbc, 0x57},
-    //E 2013/04/15
 	{0xbd, 0x27},
 	{0xbe, 0x0e},
 	{0xbf, 0xb8},
@@ -175,23 +165,15 @@ static struct msm_camera_i2c_reg_conf ov7692_recommend_settings[] = {
 	{0x8e, 0x92},
 	{0x96, 0xff},
 	{0x97, 0x00},
-    //B 2013/03/07
 	{0x13, 0xf7},
-    {0x14, 0x2f},//2013/04/15
+    {0x14, 0x2f},
 	{0x15, 0x00},
-	//{0x14, 0x3b},
-    //E 2013/03/07
 	{0x0e, 0x00},
-	//B 2012/11/09
     {0xff, 0x00},
-    {0xb4, 0x20},//2013/04/15
-    {0xb7, 0x05},//2013/01/03
-    //E 2012/11/09
-    //B 2013/03/07
+    {0xb4, 0x20},
+    {0xb7, 0x05},
     {0xb6, 0x66},
     {0xd3, 0x80},
-    //E 2013/03/07
-    //B 2013/03/14
     {0x8c, 0x5e},
 	{0x8d, 0x11},
 	{0x8e, 0x12},
@@ -215,42 +197,17 @@ static struct msm_camera_i2c_reg_conf ov7692_recommend_settings[] = {
     {0xa0, 0x65},
     {0xa1, 0x5c},
     {0xa2, 0x1c},
-    //E 2013/03/14
-    //B 2013/04/15
     {0x81, 0x2f},
     {0x5c, 0x1f},
-    //E 2013/04/15
 };
 
 static struct msm_camera_i2c_reg_conf ov7692_full_settings[] = {
-    //B 2013/04/02
     {0xff, 0x00},
     {0x31, 0x83},
     {0x20, 0x00},
     {0x21, 0x23},
     {0x50, 0x9a},
     {0x51, 0x80},
-    //E 2013/04/02
-    {0x0c, 0x00},//2012/09/19
-	{0xcc, 0x02},
-	{0xcd, 0x80},
-	{0xce, 0x01},
-	{0xcf, 0xe0},
-	{0xc8, 0x02},
-	{0xc9, 0x80},
-	{0xca, 0x01},
-	{0xcb, 0xe0},
-};
-//B 2013/01/28
-static struct msm_camera_i2c_reg_conf ov7692_half_settings[] = {
-    //B 2013/04/02
-    {0xff, 0x00},
-    {0x31, 0x87},
-    {0x20, 0x00},
-    {0x21, 0x57},
-    {0x50, 0x4d},
-    {0x51, 0x40},
-    //E 2013/04/02
     {0x0c, 0x00},
 	{0xcc, 0x02},
 	{0xcd, 0x80},
@@ -261,7 +218,24 @@ static struct msm_camera_i2c_reg_conf ov7692_half_settings[] = {
 	{0xca, 0x01},
 	{0xcb, 0xe0},
 };
-//E 2013/01/28
+
+static struct msm_camera_i2c_reg_conf ov7692_half_settings[] = {
+    {0xff, 0x00},
+    {0x31, 0x87},
+    {0x20, 0x00},
+    {0x21, 0x57},
+    {0x50, 0x4d},
+    {0x51, 0x40},
+    {0x0c, 0x00},
+	{0xcc, 0x02},
+	{0xcd, 0x80},
+	{0xce, 0x01},
+	{0xcf, 0xe0},
+	{0xc8, 0x02},
+	{0xc9, 0x80},
+	{0xca, 0x01},
+	{0xcb, 0xe0},
+};
 static struct v4l2_subdev_info ov7692_subdev_info[] = {
 	{
 		.code   = V4L2_MBUS_FMT_YUYV8_2X8,
@@ -274,10 +248,8 @@ static struct v4l2_subdev_info ov7692_subdev_info[] = {
 
 
 static struct msm_camera_i2c_conf_array ov7692_init_conf[] = {
-        //B 2012/10/29
 	{&ov7692_reset_settings[0],
 	ARRAY_SIZE(ov7692_reset_settings), 10, MSM_CAMERA_I2C_BYTE_DATA},
-        //E 2012/10/29
 	{&ov7692_recommend_settings[0],
 	ARRAY_SIZE(ov7692_recommend_settings), 0, MSM_CAMERA_I2C_BYTE_DATA}
 };
@@ -286,12 +258,10 @@ static struct msm_camera_i2c_conf_array ov7692_confs[] = {
 	{&ov7692_full_settings[0],
 	ARRAY_SIZE(ov7692_full_settings), 0, MSM_CAMERA_I2C_BYTE_DATA},
 };
-//B 2013/01/28
 static struct msm_camera_i2c_conf_array ov7692_half_fps_confs[] = {
 	{&ov7692_half_settings[0],
 	ARRAY_SIZE(ov7692_half_settings), 0, MSM_CAMERA_I2C_BYTE_DATA},	
 };
-//E 2013/01/28
 
 static struct msm_camera_i2c_reg_conf ov7692_saturation[][4] = {
 	{{0x81, 0x33, 0x00, 0x00, 0xCC}, {0xd8, 0x00, 0x00, 0x00, 0x00},
@@ -360,10 +330,8 @@ static struct msm_sensor_output_info_t ov7692_dimensions[] = {
 		.y_output = 0x1E0,
 		.line_length_pclk = 0x280,
 		.frame_length_lines = 0x1E0,
-		/*B:20120821*/
 		.vt_pixel_clk = 24000000,
 		.op_pixel_clk = 24000000,
-		/*E:20120821*/
 		.binning_factor = 1,
 	},
 };
@@ -1010,7 +978,6 @@ static struct v4l2_subdev_ops ov7692_subdev_ops = {
 	.video  = &ov7692_subdev_video_ops,
 };
 
-//B 2012/08/27
 static struct msm_cam_clk_info ov_cam_clk_info[] = {
 	{"cam_clk", MSM_SENSOR_MCLK_24HZ},
 };
@@ -1065,7 +1032,7 @@ int32_t ov7692_v4l2_power_up(struct msm_sensor_ctrl_t *s_ctrl)
 	}
         power = true;
     }
-    mdelay(10);//2012/10/29
+    mdelay(10);
 
     rc = msm_camera_config_gpio_table(data, 1);
     if (rc < 0) {
@@ -1073,12 +1040,11 @@ int32_t ov7692_v4l2_power_up(struct msm_sensor_ctrl_t *s_ctrl)
 	    goto config_gpio_failed;
     }
 
-    //mdelay(25);//2012/10/29
-    mdelay(35);//2012/11/15 
+    mdelay(35);
 
     if (s_ctrl->clk_rate != 0)
         ov_cam_clk_info->clk_rate = s_ctrl->clk_rate;
-    gpio_tlmm_config(config, 0);//2012/11/15 
+    gpio_tlmm_config(config, 0);
     rc = msm_cam_clk_enable(dev,
 		ov_cam_clk_info, s_ctrl->cam_clk, ARRAY_SIZE(ov_cam_clk_info), 1);
     if (rc < 0) {
@@ -1086,9 +1052,7 @@ int32_t ov7692_v4l2_power_up(struct msm_sensor_ctrl_t *s_ctrl)
 	    goto enable_clk_failed;
     }
 
-    //usleep_range(1000, 2000);
-    //mdelay(5);//2012/10/29
-    mdelay(8);//2012/11/15 
+    mdelay(8);
     if (data->sensor_platform_info->ext_power_ctrl != NULL)
 	    data->sensor_platform_info->ext_power_ctrl(1);
 
@@ -1174,8 +1138,7 @@ int32_t ov7692_v4l2_power_down(struct msm_sensor_ctrl_t *s_ctrl)
 	s_ctrl->curr_res = MSM_SENSOR_INVALID_RES;
 	return 0;
 }
-//E 2012/08/27
-//B 2013/01/28
+
 int32_t ov7692_write_res_settings(struct msm_sensor_ctrl_t *s_ctrl,
 	uint16_t res)
 {
@@ -1204,15 +1167,13 @@ int32_t ov7692_write_res_settings(struct msm_sensor_ctrl_t *s_ctrl,
 
 	return rc;
 }
-//B 2013/04/02
 int32_t ov7692_set_fps(struct msm_sensor_ctrl_t *s_ctrl,
 						struct fps_cfg *fps)
 {
-    int new_fps = 0;//2013/01/28
+    int new_fps = 0;
     
-	//s_ctrl->fps_divider = fps->fps_div; //2013/06/28, frame_length_lines affected by this value
-    s_ctrl->fps_divider = fps->fps_div;//2013/07/03
-    //B 2013/01/28
+    s_ctrl->fps_divider = fps->fps_div;
+
     new_fps = s_ctrl->msm_sensor_reg->output_settings->vt_pixel_clk
                   / s_ctrl->msm_sensor_reg->output_settings->frame_length_lines
                   * Q10
@@ -1227,11 +1188,9 @@ int32_t ov7692_set_fps(struct msm_sensor_ctrl_t *s_ctrl,
             ov7692_write_res_settings(s_ctrl, 0);
         }            
     }    
-    //E 2013/01/28
     
 	return 0;
 }
-//E 2013/04/02
 int32_t ov7692_setting(struct msm_sensor_ctrl_t *s_ctrl,
 			int update_type, int res)
 {
@@ -1248,33 +1207,26 @@ int32_t ov7692_setting(struct msm_sensor_ctrl_t *s_ctrl,
 		v4l2_subdev_notify(&s_ctrl->sensor_v4l2_subdev,
 			NOTIFY_PCLK_CHANGE, &s_ctrl->msm_sensor_reg->
 			output_settings[res].op_pixel_clk);
-        //B 2013/03/07
-		//msleep(600);
-        //pr_err("%s: delay 600ms to skip frames\n", __func__);
-        //E 2013/03/07
 	}
 	return rc;
 }
-//E 2013/01/28
 
 static struct msm_sensor_fn_t ov7692_func_tbl = {
 	.sensor_start_stream = msm_sensor_start_stream,
 	.sensor_stop_stream = msm_sensor_stop_stream,
 	.sensor_group_hold_on = msm_sensor_group_hold_on,
 	.sensor_group_hold_off = msm_sensor_group_hold_off,
-	.sensor_set_fps = ov7692_set_fps,//2013/04/02
+	.sensor_set_fps = ov7692_set_fps,
 	.sensor_write_exp_gain = msm_sensor_write_exp_gain1,
 	.sensor_write_snapshot_exp_gain = msm_sensor_write_exp_gain1,
-	.sensor_setting = ov7692_setting,//2013/01/28
+	.sensor_setting = ov7692_setting,
 	.sensor_csi_setting = msm_sensor_setting1,
 	.sensor_set_sensor_mode = msm_sensor_set_sensor_mode,
 	.sensor_mode_init = msm_sensor_mode_init,
 	.sensor_get_output_info = msm_sensor_get_output_info,
 	.sensor_config = msm_sensor_config,
-        //B 2012/08/27
 	.sensor_power_up = ov7692_v4l2_power_up,
 	.sensor_power_down = ov7692_v4l2_power_down,
-        //E 2012/08/27
 	.sensor_adjust_frame_lines = msm_sensor_adjust_frame_lines1,
 	.sensor_get_csi_params = msm_sensor_get_csi_params,
 };
@@ -1291,7 +1243,7 @@ static struct msm_sensor_reg_t ov7692_regs = {
 	.no_effect_settings = &ov7692_no_effect_confs[0],
 	.output_settings = &ov7692_dimensions[0],
 	.num_conf = ARRAY_SIZE(ov7692_confs),
-	.half_fps_settings = &ov7692_half_fps_confs[0],//2013/01/28
+	.half_fps_settings = &ov7692_half_fps_confs[0],
 };
 
 static struct msm_sensor_ctrl_t ov7692_s_ctrl = {

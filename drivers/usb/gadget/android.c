@@ -4,7 +4,7 @@
  * Copyright (C) 2008 Google, Inc.
  * Author: Mike Lockwood <lockwood@android.com>
  *         Benoit Goby <benoit@android.com>
- * Copyright (C) 2012 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * This software is licensed under the terms of the GNU General Public
  * License version 2, as published by the Free Software Foundation, and
@@ -1606,15 +1606,15 @@ static int mass_storage_function_init(struct android_usb_function *f,
 			config->fsg.luns[i].ro = 0;
 			config->fsg.luns[i].cdrom = 0;
 		} else {
-			/* CD-ROM lun */
+			/* CD-ROM mode lun */
 			config->fsg.luns[i].ro = 1;
 			config->fsg.luns[i].cdrom = 1;
 		}
 	}
 	config->fsg.can_stall = dev->pdata->can_stall;
 
-	config->fsg.vendor_name = "SONY";//MTD-CONN-EH-WHQL-01+
-	config->fsg.product_name = "Mass storage";//MTD-CONN-EH-WHQL-01+
+	config->fsg.vendor_name = "SONY";
+	config->fsg.product_name = "Mass Storage Device";
 #else
 	config->fsg.luns[0].removable = 1;
 #endif

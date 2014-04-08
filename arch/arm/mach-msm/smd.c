@@ -2,7 +2,7 @@
  *
  * Copyright (C) 2007 Google, Inc.
  * Copyright (c) 2008-2012, The Linux Foundation. All rights reserved.
- * Copyright (C) 2012 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  * Author: Brian Swetland <swetland@google.com>
  *
  * This software is licensed under the terms of the GNU General Public
@@ -25,6 +25,7 @@
 #include <linux/interrupt.h>
 #include <linux/irq.h>
 #include <linux/list.h>
+#include <linux/gpio.h>
 #include <linux/slab.h>
 #include <linux/delay.h>
 #include <linux/io.h>
@@ -3512,7 +3513,6 @@ static int __init check_imei(char* imei_cmdline)
 	{
 		if(strlen(imei_cmdline) == IMEI_LENGTH)
 		{
-//			printk("[SMD]imei:%s\n", imei_cmdline);
 			strncpy(imei, imei_cmdline, IMEI_LENGTH);
 		}
 		else
@@ -3524,7 +3524,7 @@ static int __init check_imei(char* imei_cmdline)
 	return 0;
 }
 __setup("oemandroidboot.imei=", check_imei);
-#endif // #ifdef WRITE_IMEI_TO_SMEM
+#endif
 
 
 static int __devinit msm_smd_probe(struct platform_device *pdev)
@@ -3533,7 +3533,7 @@ static int __devinit msm_smd_probe(struct platform_device *pdev)
 
 #ifdef WRITE_IMEI_TO_SMEM
 	void *imei_addr = NULL;
-#endif // #ifdef WRITE_IMEI_TO_SMEM
+#endif
 
 
 	SMD_INFO("smd probe\n");
@@ -3587,7 +3587,7 @@ static int __devinit msm_smd_probe(struct platform_device *pdev)
 		imei_addr = smem_alloc2(SMEM_ID_VENDOR2, IMEI_LENGTH + 1);
 		strncpy((char*)imei_addr, imei, IMEI_LENGTH);
 	}
-#endif // #ifdef WRITE_IMEI_TO_SMEM
+#endif
 
 
 	smd_alloc_loopback_channel();
@@ -3652,7 +3652,6 @@ static struct platform_driver msm_smd_driver = {
 	},
 };
 
-//S:LE
 int board_type_with_hw_id(void);
 #define GPIO_FTM_PIN_NUM 19
 #define GPIO_CAMERA_CAP	68
@@ -3660,7 +3659,7 @@ int board_type_with_hw_id(void);
 #define GPIO_BOARD_TYPE_1	50
 #define GPIO_BOARD_TYPE_2	51
 #define GPIO_BOARD_TYPE_3	53
-//Luke
+
 void set_cci_hw_id(int hw_id);
 #define GPIO_MODEL_TYPE_1       54
 #define GPIO_MODEL_TYPE_2       55
@@ -3680,15 +3679,14 @@ extern int if_board_evt;
 EXPORT_SYMBOL(ftm_pin_is_low);
 EXPORT_SYMBOL(key_capture_pressed);
 
-#include <linux/gpio.h>
-//E:LE
+
 
 int __init msm_smd_init(void)
 {
 	static bool registered;
 	int rc;
 
-//S:LE
+
 	int ret = -1;
 
 	do{
@@ -3738,7 +3736,7 @@ int __init msm_smd_init(void)
 		{
 			if_board_evt = 1;
 		}
-                // Luke
+
 		ret = gpio_request(GPIO_MODEL_TYPE_1, "gpio_model_type1");
 		if (ret)
 		{
@@ -3808,7 +3806,7 @@ int __init msm_smd_init(void)
 		gpio_tlmm_config(GPIO_CFG(GPIO_FTM_PIN_NUM, 0, GPIO_CFG_INPUT, GPIO_CFG_PULL_UP, GPIO_CFG_2MA), GPIO_CFG_ENABLE);  
 		gpio_tlmm_config(GPIO_CFG(gpio_cap, 0, GPIO_CFG_INPUT, GPIO_CFG_PULL_UP, GPIO_CFG_2MA), GPIO_CFG_ENABLE);  
 
-		mdelay(10); //M:LE
+		mdelay(10);
 
 		ftm_pin_is_low = (gpio_get_value(GPIO_FTM_PIN_NUM) ? 0 : 1);
 		key_capture_pressed = (gpio_get_value(gpio_cap) ? 0 : 1);
@@ -3816,7 +3814,7 @@ int __init msm_smd_init(void)
 		gpio_free(GPIO_FTM_PIN_NUM);
 		gpio_free(gpio_cap);
 	}while(0);
-//E:LE
+
 
 	if (registered)
 		return 0;

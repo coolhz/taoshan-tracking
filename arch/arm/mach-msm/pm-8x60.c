@@ -44,7 +44,7 @@
 
 #ifdef CONFIG_CCI_KLOG
 #include <linux/cciklog.h>
-#endif // #ifdef CONFIG_CCI_KLOG
+#endif
 
 
 #include "acpuclock.h"
@@ -134,7 +134,7 @@ extern struct timespec resume_timestamp;
 extern int suspend_resume_state;
 extern struct timespec klog_get_kernel_clock_timestamp(void);
 extern void record_suspend_resume_time(int state, unsigned int time);
-#endif // #ifdef CONFIG_CCI_KLOG
+#endif
 
 /*
  * Write out the attribute.
@@ -1033,7 +1033,7 @@ static int msm_pm_enter(suspend_state_t state)
 
 #ifdef CONFIG_CCI_KLOG
 	struct timespec current_timestamp;
-#endif // #ifdef CONFIG_CCI_KLOG
+#endif
 
 
 	time_param.latency_us = -1;
@@ -1086,17 +1086,17 @@ static int msm_pm_enter(suspend_state_t state)
 			current_timestamp = klog_get_kernel_clock_timestamp();
 #ifdef CCI_KLOG_DETAIL_LOG
 			kprintk("suspend_resume_state(%d):suspend_timestamp=%u.%u\n", suspend_resume_state, (unsigned int)current_timestamp.tv_sec, (unsigned int)current_timestamp.tv_nsec);
-#endif // #ifdef CCI_KLOG_DETAIL_LOG
+#endif
 			suspend_timestamp.tv_sec = current_timestamp.tv_sec - suspend_timestamp.tv_sec;
 			suspend_timestamp.tv_nsec = current_timestamp.tv_nsec - suspend_timestamp.tv_nsec;
 			suspend_time = (unsigned int)(suspend_timestamp.tv_sec * 1000 + suspend_timestamp.tv_nsec / 1000000);//ms
 			record_suspend_resume_time(suspend_resume_state, suspend_time);
 #ifdef CCI_KLOG_DETAIL_LOG
 			kprintk("suspend_resume_state(%d):suspend_time=%u\n", suspend_resume_state, suspend_time);
-#endif // #ifdef CCI_KLOG_DETAIL_LOG
+#endif
 		}
 		suspend_resume_state = 2;
-#endif // #ifdef CONFIG_CCI_KLOG
+#endif
 
 
 		if (rs_limits) {
@@ -1143,10 +1143,10 @@ enter_exit:
 		resume_timestamp = klog_get_kernel_clock_timestamp();
 #ifdef CCI_KLOG_DETAIL_LOG
 		kprintk("suspend_resume_state(%d):resume_timestamp=%u.%u\n", suspend_resume_state, (unsigned int)resume_timestamp.tv_sec, (unsigned int)resume_timestamp.tv_nsec);
-#endif // #ifdef CCI_KLOG_DETAIL_LOG
+#endif
 	}
 	suspend_resume_state = 3;
-#endif // #ifdef CONFIG_CCI_KLOG
+#endif
 
 	if (MSM_PM_DEBUG_SUSPEND & msm_pm_debug_mask)
 		pr_info("%s: return\n", __func__);

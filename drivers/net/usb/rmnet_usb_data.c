@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2013, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2011-2014, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -354,10 +354,10 @@ static struct sk_buff *rmnet_usb_tx_fixup(struct usbnet *dev,
 	 }
 
 	if (dev->data[4])
-		rmnet_usb_data_mux(skb, dev->data[3]);
+	rmnet_usb_data_mux(skb, dev->data[3]);
 
 	DBG1("[%s] Tx packet #%lu len=%d mark=0x%x\n",
-	    dev->net->name, dev->net->stats.tx_packets, skb->len, skb->mark);
+	dev->net->name, dev->net->stats.tx_packets, skb->len, skb->mark);
 
 	return skb;
 }

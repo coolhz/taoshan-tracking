@@ -51,6 +51,7 @@ static char rt_ert_flag;
 static char formatting_dir;
 static DEFINE_MUTEX(iris_fm);
 static unsigned char interrupt_event[STD_BUF_SIZE];
+
 module_param(rds_buf, uint, 0);
 MODULE_PARM_DESC(rds_buf, "RDS buffer entries: *100*");
 

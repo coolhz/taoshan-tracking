@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2012, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2011-2013, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -36,7 +36,7 @@
 
 #ifdef CONFIG_CCI_KLOG
 #include <linux/cciklog.h>
-#endif // #ifdef CONFIG_CCI_KLOG
+#endif
 
 
 static int crash_shutdown;
@@ -54,8 +54,8 @@ static void log_modem_sfr(void)
 #ifdef CCI_KLOG_CRASH_SIZE
 #if CCI_KLOG_CRASH_SIZE
 	set_fault_state(0x5, -1, "modem");
-#endif // #if CCI_KLOG_CRASH_SIZE
-#endif // #ifdef CCI_KLOG_CRASH_SIZE
+#endif
+#endif
 
 
 	smem_reason = smem_get_entry(SMEM_SSR_REASON_MSS0, &size);

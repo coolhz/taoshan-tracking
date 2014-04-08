@@ -675,7 +675,7 @@ config BMP18X_I2C
          module will be called bmp18x-i2c.
 
 #
-# Henry_lin, 20120708, [BugID 166] Porting sensor.
+# Sony drivers
 #
 config BOSCH_BMA250
 	tristate "BMA250 acceleration sensor support"
@@ -705,9 +705,5 @@ config SENSORS_AK8963
 	help
 	  If you say yes here you get support for Asahi Kasei's
 	  orientation sensor AK8963.
-#
-# Henry_lin
-#
-
 
 endif

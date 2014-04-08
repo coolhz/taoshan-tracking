@@ -2,7 +2,7 @@
 *   it under the terms of the GNU General Public License as published by
 *   the Free Software Foundation; either version 2 of the License, or
 *   (at your option) any later version.
-* Copyright (C) 2012 Sony Mobile Communications AB.
+* Copyright (C) 2014 Sony Mobile Communications AB.
 *
 *   This program is distributed in the hope that it will be useful,
 *   but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -15,6 +15,8 @@
 * NOTE: This file has been modified by Sony Ericsson Mobile Communications AB /
 * Sony Mobile Communications AB. Modifications are licensed under the License.
 */
+
+//Proximity Sensor
 
 #ifndef __LINUX_TAOS_H
 #define __LINUX_TAOS_H

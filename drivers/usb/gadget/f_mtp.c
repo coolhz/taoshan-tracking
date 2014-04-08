@@ -2,7 +2,7 @@
  * Gadget Function Driver for MTP
  *
  * Copyright (C) 2010 Google, Inc.
- * Copyright (C) 2012 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  * Author: Mike Lockwood <lockwood@android.com>
  *
  * This software is licensed under the terms of the GNU General Public
@@ -839,12 +839,9 @@ static void receive_file_work(struct work_struct *data)
 			}
 #endif
 			if (dev->state == STATE_RESET) {
-				//DBG(cdev, "receive_file_work DEVICE RESET\n");
                                 printk(KERN_ERR "receive_file_work DEVICE RESET\n");
 				r = -ECONNRESET;
 				if (!dev->rx_done) {
-					//DBG(cdev, "usb_ep_dequeue"
-					//	"DEVICE RESET\n");
                                         printk(KERN_ERR "usb_ep_dequeue...DEVICE RESET\n");
 					usb_ep_dequeue(dev->ep_out, read_req);
 				}
@@ -935,8 +932,6 @@ static long mtp_ioctl(struct file *fp, unsigned code, unsigned long value)
 
 		if (dev->state == STATE_RESET) {
 			/* report reset to userspace */
-			//DBG(dev->cdev, "report reset to user space..."
-			//	"mtp_ioctl... DEVICE RESET");
                         printk(KERN_ERR "report reset to user space...mtp_ioctl... DEVICE RESET\n");
 			dev->state = STATE_READY;
 			spin_unlock_irq(&dev->lock);
@@ -1198,8 +1193,6 @@ static int mtp_ctrlrequest(struct usb_composite_dev *cdev,
 			else if (dev->state == STATE_RESET) {
 				status->wCode =
 					__cpu_to_le16(MTP_RESPONSE_OK);
-				//DBG(cdev, "Device goest to ready state from"
-				//	"reset state... DEVICE RESET\n");
                                 printk(KERN_ERR "Device goest to ready state from reset state... DEVICE RESET\n");
 			}
 			else

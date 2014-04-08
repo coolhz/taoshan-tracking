@@ -8,7 +8,7 @@
 
  * (C) Copyright 2011 Bosch Sensortec GmbH
  * All Rights Reserved
- * Copyright (C) 2012 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications AB.
  */
 
 
@@ -31,28 +31,27 @@
 #ifdef CONFIG_HAS_EARLYSUSPEND
 #include <linux/earlysuspend.h>
 #endif
-/*#include <../arch/arm/mach-omap2/mux.h>*/
 
-#if 1   //add
+#if 1
 #include <linux/gpio.h>
 #endif
 
-#if 1   // add
+#if 1
 #include <linux/regulator/consumer.h>
 #endif
 
-#if 1 // add ,20121011 - [] [][] use G-sensor to enable/disable TP for ESD test!
+#if 1 
 #include <linux/cyttsp3_core.h>
 #endif
 /*---------------------  Static Definitions -------------------------*/
-#define BMA_DEBUG 0   //0:disable, 1:enable
+#define BMA_DEBUG 0
 #if(BMA_DEBUG)
     #define Printhh(string, args...)    printk("BMA(K)=> "string, ##args);
 #else
     #define Printhh(string, args...)
 #endif
 
-#define BMA_TIP 1 //give RD information. Set 1 if develop,and set 0 when release.
+#define BMA_TIP 1
 #if(BMA_TIP)
     #define PrintTip(string, args...)    printk("BMA(K)=> "string, ##args);
 #else
@@ -60,7 +59,7 @@
 #endif
 /*---------------------  Static Classes  ----------------------------*/
 
-#if 1   // add for 
+#if 1 
 #define BMA_I2C_SDA_GPIO   8
 #define BMA_I2C_CLK_GPIO   9
 #define BMA_INT1_GPIO   46
@@ -79,7 +78,6 @@
 #define SLOPE_X_INDEX 			5
 #define SLOPE_Y_INDEX 			6
 #define SLOPE_Z_INDEX 			7
-//#define BMA250_MAX_DELAY		200
 #define BMA250_MAX_DELAY		1000
 #define BMA250_CHIP_ID			3
 #define BMA250_RANGE_SET		0
@@ -942,13 +940,13 @@ static int bma250_set_int1_pad_sel(struct i2c_client *client, unsigned char
 				BMA250_EN_INT1_PAD_FLAT__REG, &data);
 		break;
 
-#if 1   // add
+#if 1
 	case 7:
      
      #if 0
      #define BMA250_SET_BITSLICE(regvar, bitname, val)\
 	((regvar & ~bitname##__MSK) | ((val<<bitname##__POS)&bitname##__MSK))
-     #endif //BMA250_EN_INT1_PAD_NEWDATA__MSK , BMA250_EN_INT1_PAD_FLAT__POS
+     #endif
 		comres = bma250_smbus_read_byte(client,
 				BMA250_INT_DATA_SEL_REG, &data);
 		data = BMA250_SET_BITSLICE(data, BMA250_EN_INT1_PAD_NEWDATA,
@@ -1080,7 +1078,7 @@ static int bma250_set_Int_Enable(struct i2c_client *client, unsigned char
 #if 0
 #define BMA250_SET_BITSLICE(regvar, bitname, val)\
 	((regvar & ~bitname##__MSK) | ((val<<bitname##__POS)&bitname##__MSK))
-#endif  //BMA250_EN_NEW_DATA_INT__MSK , BMA250_EN_NEW_DATA_INT__POS
+#endif
 		data2 = BMA250_SET_BITSLICE(data2, BMA250_EN_NEW_DATA_INT,
 				value);
 		break;
@@ -1158,7 +1156,6 @@ static int bma250_set_range(struct i2c_client *client, unsigned char Range)
 	if (Range < 4) {
 		comres = bma250_smbus_read_byte(client,
 				BMA250_RANGE_SEL_REG, &data1);
-		//Printhh("[%s] data1 = %#x 111\n", __FUNCTION__, data1);
 		switch (Range) {
 #if 0
 #define BMA250_SET_BITSLICE(regvar, bitname, val)\
@@ -1166,7 +1163,7 @@ static int bma250_set_range(struct i2c_client *client, unsigned char Range)
 #endif
 		case 0:
 			data1  = BMA250_SET_BITSLICE(data1,
-					BMA250_RANGE_SEL, 3);   //BMA250_RANGE_SEL__MSK, BMA250_RANGE_SEL__POS
+					BMA250_RANGE_SEL, 3);
 			break;
 		case 1:
 			data1  = BMA250_SET_BITSLICE(data1,
@@ -1183,7 +1180,6 @@ static int bma250_set_range(struct i2c_client *client, unsigned char Range)
 		default:
 			break;
 		}
-		//Printhh("[%s] data1 = %#x\n", __FUNCTION__, data1);
 
 		comres += bma250_smbus_write_byte(client,
 				BMA250_RANGE_SEL_REG, &data1);
@@ -1250,12 +1246,12 @@ static int bma250_set_bandwidth(struct i2c_client *client, unsigned char BW)
 		}
 		comres = bma250_smbus_read_byte(client,
 				BMA250_BANDWIDTH__REG, &data);
-#if 0   //check
+#if 0
 #define BMA250_SET_BITSLICE(regvar, bitname, val)\
 	((regvar & ~bitname##__MSK) | ((val<<bitname##__POS)&bitname##__MSK))
 #endif
 		data = BMA250_SET_BITSLICE(data, BMA250_BANDWIDTH,
-				Bandwidth);//BMA250_BANDWIDTH__MSK , BMA250_BANDWIDTH__POS
+				Bandwidth);
 		comres += bma250_smbus_write_byte(client,
 				BMA250_BANDWIDTH__REG, &data);
 	} else{
@@ -1571,9 +1567,6 @@ static int bma250_get_low_g_threshold(struct i2c_client *client, unsigned char
 	return comres;
 }
 
-//
-// , 20120925, [] Coverity report bug fixed.
-//
 #define BMA250_SET_BITSLICE_2(regvar, bitname, val)\
 	( ((regvar & ~bitname##__MSK)?(regvar & ~bitname##__MSK):0) | ((val<<bitname##__POS)&bitname##__MSK))
 
@@ -1585,17 +1578,11 @@ static int bma250_set_high_g_duration(struct i2c_client *client, unsigned char
 	unsigned char data;
 
 	comres = bma250_smbus_read_byte(client, BMA250_HIGHG_DUR__REG, &data);
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
+
 #if 0
 	data = BMA250_SET_BITSLICE(data, BMA250_HIGHG_DUR, duration);
 #else
-	//data = BMA250_SET_BITSLICE(data, BMA250_HIGHG_DUR, duration);
-	//PrintTip("[%s] data org=%#x..\n", __FUNCTION__, data);
-
 	data = BMA250_SET_BITSLICE_2(data, BMA250_HIGHG_DUR, duration);
-	//PrintTip("[%s] data new=%#x..\n", __FUNCTION__, data);
 #endif
 
 	comres = bma250_smbus_write_byte(client, BMA250_HIGHG_DUR__REG, &data);
@@ -2286,48 +2273,35 @@ static int bma250_read_accel_xyz(struct i2c_client *client,
 #if 0
 #define BMA250_GET_BITSLICE(regvar, bitname)\
 	((regvar & bitname##__MSK) >> bitname##__POS)
-#endif  //BMA250_ACC_X_LSB__MSK , BMA250_ACC_X_LSB__POS , BMA250_ACC_X_MSB__MSK , BMA250_ACC_X_MSB__POS
+#endif
 	acc->x = BMA250_GET_BITSLICE(data[0], BMA250_ACC_X_LSB)
 		|(BMA250_GET_BITSLICE(data[1], BMA250_ACC_X_MSB)<<BMA250_ACC_X_LSB__LEN);
-	//Printhh("[%s] data[0]=%#x data[1]=%#x\n", __FUNCTION__, data[0], data[1]);
-	//Printhh("[%s] acc->x=%d 111\n", __FUNCTION__, acc->x);
-	//Printhh("[%s] sizeof(short)*8 = %d\n", __FUNCTION__, (sizeof(short)*8));
-
 	acc->x = acc->x << (sizeof(short)*8-(BMA250_ACC_X_LSB__LEN
 				+ BMA250_ACC_X_MSB__LEN));
-	//Printhh("[%s] acc->x=%d 222\n", __FUNCTION__, acc->x);
 	acc->x = acc->x >> (sizeof(short)*8-(BMA250_ACC_X_LSB__LEN
 				+ BMA250_ACC_X_MSB__LEN));
-	//Printhh("[%s] acc->x=%d 333\n", __FUNCTION__, acc->x);
     
 	acc->y = BMA250_GET_BITSLICE(data[2], BMA250_ACC_Y_LSB)
 		| (BMA250_GET_BITSLICE(data[3],
 				BMA250_ACC_Y_MSB)<<BMA250_ACC_Y_LSB__LEN);
-	//Printhh("[%s] acc->y=%d 111\n", __FUNCTION__, acc->y);
 	acc->y = acc->y << (sizeof(short)*8-(BMA250_ACC_Y_LSB__LEN
 				+ BMA250_ACC_Y_MSB__LEN));
-	//Printhh("[%s] acc->y=%d 222\n", __FUNCTION__, acc->y);
 	acc->y = acc->y >> (sizeof(short)*8-(BMA250_ACC_Y_LSB__LEN
 				+ BMA250_ACC_Y_MSB__LEN));
-	//Printhh("[%s] acc->y=%d 333\n", __FUNCTION__, acc->y);
 
 	acc->z = BMA250_GET_BITSLICE(data[4], BMA250_ACC_Z_LSB)
 		| (BMA250_GET_BITSLICE(data[5],
 				BMA250_ACC_Z_MSB)<<BMA250_ACC_Z_LSB__LEN);
-	//Printhh("[%s] acc->z=%d 111\n", __FUNCTION__, acc->z);
 	acc->z = acc->z << (sizeof(short)*8-(BMA250_ACC_Z_LSB__LEN
 				+ BMA250_ACC_Z_MSB__LEN));
-	//Printhh("[%s] acc->z=%d 222\n", __FUNCTION__, acc->z);
 	acc->z = acc->z >> (sizeof(short)*8-(BMA250_ACC_Z_LSB__LEN
 				+ BMA250_ACC_Z_MSB__LEN));
-	//Printhh("[%s] acc->z=%d 333\n", __FUNCTION__, acc->z);
-
 
 	return comres;
 }
 
 
-#ifdef CONFIG_USE_SENSOR_FOR_ESD   // add ,20121008 - [:] [][] for ESD test!
+#ifdef CONFIG_USE_SENSOR_FOR_ESD
 atomic_t g_aIsFaceUp;
 atomic_t g_aIsFaceDwon;
 
@@ -2361,7 +2335,7 @@ int BMA250_iIsFaceDown(void)
         return 0;
 }
 EXPORT_SYMBOL(BMA250_iIsFaceDown); 
-#endif  // end
+#endif
 
 
 static void bma250_work_func(struct work_struct *work)
@@ -2391,8 +2365,7 @@ static void bma250_work_func(struct work_struct *work)
     input_report_abs(bma250->input, ABS_Y, acc.y);
     input_report_abs(bma250->input, ABS_Z, acc.z);
 
-#ifdef CONFIG_USE_SENSOR_FOR_ESD  // add ,20121008 - [:] [][] for ESD test!
-    //PrintTip("[%s] acc.z=%d\n", __FUNCTION__, acc.z);
+#ifdef CONFIG_USE_SENSOR_FOR_ESD
     if( (acc.z > 240) && (acc.z < 270) ){
         atomic_set(&g_aIsFaceUp, (unsigned int)1);
         atomic_set(&g_aIsFaceDwon, (unsigned int)0);
@@ -2407,7 +2380,7 @@ static void bma250_work_func(struct work_struct *work)
         atomic_set(&g_aIsFaceUp, (unsigned int)-1);
         atomic_set(&g_aIsFaceDwon, (unsigned int)-1);
     }
-#endif // end
+#endif
 
 
     input_sync(bma250->input);
@@ -2448,10 +2421,7 @@ static ssize_t bma250_register_show(struct device *dev,
 
 	for (i = 0 ; i < 0x3d; i++) {
 		bma250_smbus_read_byte(bma250->bma250_client, i, reg+i);
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
-		//count += sprintf(&buf[count], "0x%x: %d\n", i, reg[i]);
+
 		count += snprintf(&buf[count], PAGE_SIZE, "0x%x: %d\n", i, reg[i]);
 	}
 	return count;
@@ -2465,14 +2435,9 @@ static ssize_t bma250_range_show(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma250_data *bma250 = i2c_get_clientdata(client);
 
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
 	if (bma250_get_range(bma250->bma250_client, &data) < 0)
-		//return sprintf(buf, "Read error\n");
 		return snprintf(buf, PAGE_SIZE, "Read error\n");
 
-	//return sprintf(buf, "%d\n", data);
 	return snprintf(buf, PAGE_SIZE, "%d\n", data);
 }
 
@@ -2501,14 +2466,9 @@ static ssize_t bma250_bandwidth_show(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma250_data *bma250 = i2c_get_clientdata(client);
 
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
 	if (bma250_get_bandwidth(bma250->bma250_client, &data) < 0)
-		//return sprintf(buf, "Read error\n");
 		return snprintf(buf, PAGE_SIZE, "Read error\n");
 
-	//return sprintf(buf, "%d\n", data);
 	return snprintf(buf, PAGE_SIZE, "%d\n", data);
 
 }
@@ -2539,14 +2499,9 @@ static ssize_t bma250_mode_show(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma250_data *bma250 = i2c_get_clientdata(client);
 
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
 	if (bma250_get_mode(bma250->bma250_client, &data) < 0)
-		//return sprintf(buf, "Read error\n");
 		return snprintf(buf, PAGE_SIZE, "Read error\n");
 
-	//return sprintf(buf, "%d\n", data);
 	return snprintf(buf, PAGE_SIZE, "%d\n", data);
 }
 
@@ -2580,11 +2535,6 @@ static ssize_t bma250_value_show(struct device *dev,
 	acc_value = bma250->value;
 	mutex_unlock(&bma250->value_mutex);
 
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
-	//return sprintf(buf, "%d %d %d\n", acc_value.x, acc_value.y,
-	//		acc_value.z);
 	return snprintf(buf, PAGE_SIZE, "%d %d %d\n", acc_value.x, acc_value.y,
 			acc_value.z);
 }
@@ -2595,10 +2545,6 @@ static ssize_t bma250_delay_show(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma250_data *bma250 = i2c_get_clientdata(client);
 
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
-	//return sprintf(buf, "%d\n", atomic_read(&bma250->delay));
 	return snprintf(buf, PAGE_SIZE, "%d\n", atomic_read(&bma250->delay));
 
 }
@@ -2621,9 +2567,6 @@ static ssize_t bma250_delay_store(struct device *dev,
 	if (data > BMA250_MAX_DELAY)
 		data = BMA250_MAX_DELAY;
 
-//
-// , 20120907, [ ] Google Maps not smooth.
-//
 #if 0
 	if (data <= 200)
 		data = 200;
@@ -2631,7 +2574,6 @@ static ssize_t bma250_delay_store(struct device *dev,
 	if (data <= 20)
 		data = 20;
 #endif
-// 
 
 	atomic_set(&bma250->delay, (unsigned int) data);
 
@@ -2645,10 +2587,7 @@ static ssize_t bma250_enable_show(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma250_data *bma250 = i2c_get_clientdata(client);
 
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
-	//return sprintf(buf, "%d\n", atomic_read(&bma250->enable));
+
 	return snprintf(buf, PAGE_SIZE, "%d\n", atomic_read(&bma250->enable));
 
 }
@@ -2665,16 +2604,15 @@ static void bma250_set_enable(struct device *dev, int enable)
 			bma250_set_mode(bma250->bma250_client,
 					BMA250_MODE_NORMAL);
 			schedule_delayed_work(&bma250->work,
-				msecs_to_jiffies(atomic_read(&bma250->delay)));	// : == bma250_work_func()
+				msecs_to_jiffies(atomic_read(&bma250->delay)));
 			atomic_set(&bma250->enable, 1);
-			//Printhh("[%s] bma250->delay = %d\n", __FUNCTION__, (int)atomic_read(&bma250->delay));
 		}
 
 	} else {
 		if (pre_enable == 1) {
 			bma250_set_mode(bma250->bma250_client,
 					BMA250_MODE_SUSPEND);
-			cancel_delayed_work_sync(&bma250->work);	// : == bma250_work_func()
+			cancel_delayed_work_sync(&bma250->work);
 			atomic_set(&bma250->enable, 0);
 		}
 	}
@@ -2715,9 +2653,6 @@ static ssize_t bma250_enable_int_store(struct device *dev,
 }
 
 
-//
-// , 20121029, [ ] Supply g-sensor softreset function.
-//
 #if 1
 static ssize_t bma250_softreset_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
@@ -2760,14 +2695,9 @@ static ssize_t bma250_int_mode_show(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma250_data *bma250 = i2c_get_clientdata(client);
 
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
 	if (bma250_get_Int_Mode(bma250->bma250_client, &data) < 0)
-		//return sprintf(buf, "Read error\n");
 		return snprintf(buf, PAGE_SIZE, "Read error\n");
 
-	//return sprintf(buf, "%d\n", data);
 	return snprintf(buf, PAGE_SIZE, "%d\n", data);
 }
 
@@ -2796,14 +2726,9 @@ static ssize_t bma250_slope_duration_show(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma250_data *bma250 = i2c_get_clientdata(client);
 
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
 	if (bma250_get_slope_duration(bma250->bma250_client, &data) < 0)
-		//return sprintf(buf, "Read error\n");
 		return snprintf(buf, PAGE_SIZE, "Read error\n");
 
-	//return sprintf(buf, "%d\n", data);
 	return snprintf(buf, PAGE_SIZE, "%d\n", data);
 
 }
@@ -2835,14 +2760,9 @@ static ssize_t bma250_slope_threshold_show(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma250_data *bma250 = i2c_get_clientdata(client);
 
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
 	if (bma250_get_slope_threshold(bma250->bma250_client, &data) < 0)
-		//return sprintf(buf, "Read error\n");
 		return snprintf(buf, PAGE_SIZE, "Read error\n");
 
-	//return sprintf(buf, "%d\n", data);
 	return snprintf(buf, PAGE_SIZE, "%d\n", data);
 
 }
@@ -2872,14 +2792,9 @@ static ssize_t bma250_high_g_duration_show(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma250_data *bma250 = i2c_get_clientdata(client);
 
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
 	if (bma250_get_high_g_duration(bma250->bma250_client, &data) < 0)
-		//return sprintf(buf, "Read error\n");
 		return snprintf(buf, PAGE_SIZE, "Read error\n");
 
-	//return sprintf(buf, "%d\n", data);
 	return snprintf(buf, PAGE_SIZE, "%d\n", data);
 
 }
@@ -2911,14 +2826,10 @@ static ssize_t bma250_high_g_threshold_show(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma250_data *bma250 = i2c_get_clientdata(client);
 
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
+
 	if (bma250_get_high_g_threshold(bma250->bma250_client, &data) < 0)
-		//return sprintf(buf, "Read error\n");
 		return snprintf(buf, PAGE_SIZE, "Read error\n");
 
-	//return sprintf(buf, "%d\n", data);
 	return snprintf(buf, PAGE_SIZE, "%d\n", data);
 
 }
@@ -2949,14 +2860,9 @@ static ssize_t bma250_low_g_duration_show(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma250_data *bma250 = i2c_get_clientdata(client);
 
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
 	if (bma250_get_low_g_duration(bma250->bma250_client, &data) < 0)
-		//return sprintf(buf, "Read error\n");
 		return snprintf(buf, PAGE_SIZE, "Read error\n");
 
-	//return sprintf(buf, "%d\n", data);
 	return snprintf(buf, PAGE_SIZE, "%d\n", data);
 
 }
@@ -2988,14 +2894,9 @@ static ssize_t bma250_low_g_threshold_show(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma250_data *bma250 = i2c_get_clientdata(client);
 
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
 	if (bma250_get_low_g_threshold(bma250->bma250_client, &data) < 0)
-		//return sprintf(buf, "Read error\n");
 		return snprintf(buf, PAGE_SIZE, "Read error\n");
 
-	//return sprintf(buf, "%d\n", data);
 	return snprintf(buf, PAGE_SIZE, "%d\n", data);
 
 }
@@ -3025,14 +2926,9 @@ static ssize_t bma250_tap_threshold_show(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma250_data *bma250 = i2c_get_clientdata(client);
 
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
 	if (bma250_get_tap_threshold(bma250->bma250_client, &data) < 0)
-		//return sprintf(buf, "Read error\n");
 		return snprintf(buf, PAGE_SIZE, "Read error\n");
 
-	//return sprintf(buf, "%d\n", data);
 	return snprintf(buf, PAGE_SIZE, "%d\n", data);
 
 }
@@ -3062,14 +2958,9 @@ static ssize_t bma250_tap_duration_show(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma250_data *bma250 = i2c_get_clientdata(client);
 
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
 	if (bma250_get_tap_duration(bma250->bma250_client, &data) < 0)
-		//return sprintf(buf, "Read error\n");
 		return snprintf(buf, PAGE_SIZE, "Read error\n");
 
-	//return sprintf(buf, "%d\n", data);
 	return snprintf(buf, PAGE_SIZE, "%d\n", data);
 
 }
@@ -3100,14 +2991,9 @@ static ssize_t bma250_tap_quiet_show(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma250_data *bma250 = i2c_get_clientdata(client);
 
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
 	if (bma250_get_tap_quiet(bma250->bma250_client, &data) < 0)
-		//return sprintf(buf, "Read error\n");
 		return snprintf(buf, PAGE_SIZE, "Read error\n");
 
-	//return sprintf(buf, "%d\n", data);
 	return snprintf(buf, PAGE_SIZE, "%d\n", data);
 
 }
@@ -3139,14 +3025,9 @@ static ssize_t bma250_tap_shock_show(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma250_data *bma250 = i2c_get_clientdata(client);
 
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
 	if (bma250_get_tap_shock(bma250->bma250_client, &data) < 0)
-		//return sprintf(buf, "Read error\n");
 		return snprintf(buf, PAGE_SIZE, "Read error\n");
 
-	//return sprintf(buf, "%d\n", data);
 	return snprintf(buf, PAGE_SIZE, "%d\n", data);
 
 }
@@ -3178,14 +3059,10 @@ static ssize_t bma250_tap_samp_show(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma250_data *bma250 = i2c_get_clientdata(client);
 
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
+
 	if (bma250_get_tap_samp(bma250->bma250_client, &data) < 0)
-		//return sprintf(buf, "Read error\n");
 		return snprintf(buf, PAGE_SIZE, "Read error\n");
 
-	//return sprintf(buf, "%d\n", data);
 	return snprintf(buf, PAGE_SIZE, "%d\n", data);
 
 }
@@ -3216,14 +3093,9 @@ static ssize_t bma250_orient_mode_show(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma250_data *bma250 = i2c_get_clientdata(client);
 
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
 	if (bma250_get_orient_mode(bma250->bma250_client, &data) < 0)
-		//return sprintf(buf, "Read error\n");
 		return snprintf(buf, PAGE_SIZE, "Read error\n");
 
-	//return sprintf(buf, "%d\n", data);
 	return snprintf(buf, PAGE_SIZE, "%d\n", data);
 
 }
@@ -3255,14 +3127,9 @@ static ssize_t bma250_orient_blocking_show(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma250_data *bma250 = i2c_get_clientdata(client);
 
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
 	if (bma250_get_orient_blocking(bma250->bma250_client, &data) < 0)
-		//return sprintf(buf, "Read error\n");
 		return snprintf(buf, PAGE_SIZE, "Read error\n");
 
-	//return sprintf(buf, "%d\n", data);
 	return snprintf(buf, PAGE_SIZE, "%d\n", data);
 
 }
@@ -3293,14 +3160,9 @@ static ssize_t bma250_orient_hyst_show(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma250_data *bma250 = i2c_get_clientdata(client);
 
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
 	if (bma250_get_orient_hyst(bma250->bma250_client, &data) < 0)
-		//return sprintf(buf, "Read error\n");
 		return snprintf(buf, PAGE_SIZE, "Read error\n");
 
-	//return sprintf(buf, "%d\n", data);
 	return snprintf(buf, PAGE_SIZE, "%d\n", data);
 
 }
@@ -3332,14 +3194,9 @@ static ssize_t bma250_orient_theta_show(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma250_data *bma250 = i2c_get_clientdata(client);
 
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
 	if (bma250_get_theta_blocking(bma250->bma250_client, &data) < 0)
-		//return sprintf(buf, "Read error\n");
 		return snprintf(buf, PAGE_SIZE, "Read error\n");
 
-	//return sprintf(buf, "%d\n", data);
 	return snprintf(buf, PAGE_SIZE, "%d\n", data);
 
 }
@@ -3371,14 +3228,9 @@ static ssize_t bma250_flat_theta_show(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma250_data *bma250 = i2c_get_clientdata(client);
 
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
 	if (bma250_get_theta_flat(bma250->bma250_client, &data) < 0)
-		//return sprintf(buf, "Read error\n");
 		return snprintf(buf, PAGE_SIZE, "Read error\n");
 
-	//return sprintf(buf, "%d\n", data);
 	return snprintf(buf, PAGE_SIZE, "%d\n", data);
 
 }
@@ -3409,14 +3261,9 @@ static ssize_t bma250_flat_hold_time_show(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma250_data *bma250 = i2c_get_clientdata(client);
 
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
 	if (bma250_get_flat_hold_time(bma250->bma250_client, &data) < 0)
-		//return sprintf(buf, "Read error\n");
 		return snprintf(buf, PAGE_SIZE, "Read error\n");
 
-	//return sprintf(buf, "%d\n", data);
 	return snprintf(buf, PAGE_SIZE, "%d\n", data);
 
 }
@@ -3441,15 +3288,9 @@ static ssize_t bma250_flat_hold_time_store(struct device *dev,
 	return count;
 }
 
-
-//
-// , 20120717, [ ] Supply g_sensor calibration .
-//
 #if 1
 #define CALI_CNT    200
-//#define CALI_CNT    50   //org
-#define CALI_RDY_CHK_DELAY    4     //ms
-//#define CALI_RDY_CHK_DELAY    2     //ms; org
+#define CALI_RDY_CHK_DELAY    4
 
 typedef enum _CALI_RESULT{
 	CALI_X	= 0,
@@ -3460,7 +3301,6 @@ typedef enum _CALI_RESULT{
 
 unsigned char g_ucCaliRet[4] = {0};
 #endif
-// 
 
 static ssize_t bma250_fast_calibration_x_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
@@ -3472,23 +3312,17 @@ static ssize_t bma250_fast_calibration_x_show(struct device *dev,
 
 	if (bma250_get_offset_target_x(bma250->bma250_client, &data) < 0)
 	{
-#if 1   //  add for
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
+#if 1
             data = 0;
-		//return sprintf(buf, "%d\n", data);
 		return snprintf(buf, PAGE_SIZE, "%d\n", data);
 #else
-		//return sprintf(buf, "Read error\n");
 		return snprintf(buf, PAGE_SIZE, "Read error\n");
 #endif
 	}
 
-#if 1   //  add for 
+#if 1
 	data = g_ucCaliRet[CALI_X];
 #endif
-	//return sprintf(buf, "%d\n", data);
 	return snprintf(buf, PAGE_SIZE, "%d\n", data);
 
 }
@@ -3505,8 +3339,8 @@ static ssize_t bma250_fast_calibration_x_store(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma250_data *bma250 = i2c_get_clientdata(client);
 
-#if 1 //  add for
-	g_ucCaliRet[CALI_X] = 0;    //default set ret is fail
+#if 1
+	g_ucCaliRet[CALI_X] = 0;
 #endif
 
 	error = strict_strtoul(buf, 10, &data);
@@ -3549,23 +3383,17 @@ static ssize_t bma250_fast_calibration_y_show(struct device *dev,
 
 	if (bma250_get_offset_target_y(bma250->bma250_client, &data) < 0)
 	{
-#if 1   //  add for 
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
+#if 1
             data = 0;
-		//return sprintf(buf, "%d\n", data);
 		return snprintf(buf, PAGE_SIZE, "%d\n", data);
 #else
-		//return sprintf(buf, "Read error\n");
 		return snprintf(buf, PAGE_SIZE, "Read error\n");
 #endif
 	}
 
-#if 1   //  add for 
+#if 1 
 	data = g_ucCaliRet[CALI_Y];
 #endif
-	//return sprintf(buf, "%d\n", data);
 	return snprintf(buf, PAGE_SIZE, "%d\n", data);
 
 }
@@ -3581,8 +3409,8 @@ static ssize_t bma250_fast_calibration_y_store(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma250_data *bma250 = i2c_get_clientdata(client);
 
-#if 1 //  add for 
-	g_ucCaliRet[CALI_Y] = 0;    //default set ret is fail
+#if 1 
+	g_ucCaliRet[CALI_Y] = 0;
 #endif
 
 	error = strict_strtoul(buf, 10, &data);
@@ -3600,7 +3428,6 @@ static ssize_t bma250_fast_calibration_y_store(struct device *dev,
 		mdelay(CALI_RDY_CHK_DELAY);
 		bma250_get_cal_ready(bma250->bma250_client, &tmp);
 
-	/*	printk(KERN_INFO "wait 2ms cal ready flag is %d\n",tmp);*/
 		iTimeout++;
 		if (iTimeout == CALI_CNT) {
 			printk(KERN_INFO "get fast calibration ready error\n");
@@ -3625,24 +3452,18 @@ static ssize_t bma250_fast_calibration_z_show(struct device *dev,
 
 	if (bma250_get_offset_target_z(bma250->bma250_client, &data) < 0)
 	{
-#if 1   //  add for
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
+#if 1
              data = 0;
-		//return sprintf(buf, "%d\n", data);
 		return snprintf(buf, PAGE_SIZE, "%d\n", data);
 #else
-		//return sprintf(buf, "Read error\n");
 		return snprintf(buf, PAGE_SIZE, "Read error\n");
 #endif
 	}
 
-#if 1   //  add for 
+#if 1
 	data = g_ucCaliRet[CALI_Z];
 #endif
 
-	//return sprintf(buf, "%d\n", data);
 	return snprintf(buf, PAGE_SIZE, "%d\n", data);
 
 }
@@ -3658,8 +3479,8 @@ static ssize_t bma250_fast_calibration_z_store(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma250_data *bma250 = i2c_get_clientdata(client);
 
-#if 1 //  add for 
-	g_ucCaliRet[CALI_Z] = 0;    //default set ret is fail
+#if 1 
+	g_ucCaliRet[CALI_Z] = 0;
 #endif
 
 	error = strict_strtoul(buf, 10, &data);
@@ -3697,10 +3518,6 @@ static ssize_t bma250_selftest_show(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma250_data *bma250 = i2c_get_clientdata(client);
 
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
-	//return sprintf(buf, "%d\n", atomic_read(&bma250->selftest_result));
 	return snprintf(buf, PAGE_SIZE, "%d\n", atomic_read(&bma250->selftest_result));
 
 }
@@ -3799,23 +3616,18 @@ static ssize_t bma250_eeprom_writing_show(struct device *dev,
 
 	if (bma250_get_eeprom_writing_status(bma250->bma250_client, &data) < 0)
 	{
-#if 1   //  add for
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
+#if 1
+
              data = 0;
-		//return sprintf(buf, "%d\n", data);
 		return snprintf(buf, PAGE_SIZE, "%d\n", data);
 #else
-		//return sprintf(buf, "Read error\n");
 		return snprintf(buf, PAGE_SIZE, "Read error\n");
 #endif
 	}
 
-#if 1   //  add for
+#if 1
 	data = g_ucCaliRet[CALI_WR];
 #endif
-	//return sprintf(buf, "%d\n", data);
 	return snprintf(buf, PAGE_SIZE, "%d\n", data);
 
 }
@@ -3831,8 +3643,8 @@ static ssize_t bma250_eeprom_writing_store(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma250_data *bma250 = i2c_get_clientdata(client);
 
-#if 1 //  add for 
-	g_ucCaliRet[CALI_WR] = 0;    //default set ret is fail
+#if 1 
+	g_ucCaliRet[CALI_WR] = 0;
 #endif
 
 	error = strict_strtoul(buf, 10, &data);
@@ -3874,8 +3686,8 @@ static ssize_t bma250_eeprom_writing_store(struct device *dev,
 		return -EINVAL;
 
 	printk(KERN_INFO "lock eeprom successful\n");
-#if 1 //  add for 
-	g_ucCaliRet[CALI_WR] = 1;    //set ret is success
+#if 1
+	g_ucCaliRet[CALI_WR] = 1;
 #endif
 	return count;
 }
@@ -3887,14 +3699,10 @@ static ssize_t bma250_offset_filt_x_show(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma250_data *bma250 = i2c_get_clientdata(client);
 
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
+
 	if (bma250_get_offset_filt_x(bma250->bma250_client, &data) < 0)
-		//return sprintf(buf, "Read error\n");
 		return snprintf(buf, PAGE_SIZE, "Read error\n");
 
-	//return sprintf(buf, "%d\n", data);
 	return snprintf(buf, PAGE_SIZE, "%d\n", data);
 
 }
@@ -3926,14 +3734,10 @@ static ssize_t bma250_offset_filt_y_show(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma250_data *bma250 = i2c_get_clientdata(client);
 
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
+
 	if (bma250_get_offset_filt_y(bma250->bma250_client, &data) < 0)
-		//return sprintf(buf, "Read error\n");
 		return snprintf(buf, PAGE_SIZE, "Read error\n");
 
-	//return sprintf(buf, "%d\n", data);
 	return snprintf(buf, PAGE_SIZE, "%d\n", data);
 
 }
@@ -3965,14 +3769,11 @@ static ssize_t bma250_offset_filt_z_show(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma250_data *bma250 = i2c_get_clientdata(client);
 
-//
-// , 20120925, [ ] Coverity report bug fixed.
-//
+
 	if (bma250_get_offset_filt_z(bma250->bma250_client, &data) < 0)
-		//return sprintf(buf, "Read error\n");
+
 		return snprintf(buf, PAGE_SIZE, "Read error\n");
 
-	//return sprintf(buf, "%d\n", data);
 	return snprintf(buf, PAGE_SIZE, "%d\n", data);
 
 }
@@ -3997,7 +3798,6 @@ static ssize_t bma250_offset_filt_z_store(struct device *dev,
 	return count;
 }
 
-//#, 20121126, [ ] 
 #if 0
 static DEVICE_ATTR(range, S_IRUGO|S_IWUSR|S_IWGRP|S_IWOTH,
 		bma250_range_show, bma250_range_store);
@@ -4150,9 +3950,6 @@ static DEVICE_ATTR(offset_filt_z, S_IRUGO|S_IWUSR|S_IWGRP,
 		bma250_offset_filt_z_store);
 #endif
 
-//
-// , 20121029, [ ] Supply g-sensor softreset function
-//
 #if 0
 static DEVICE_ATTR(softreset, S_IWUSR|S_IWGRP|S_IWOTH,
 		NULL, bma250_softreset_store);
@@ -4224,8 +4021,6 @@ static void bma250_irq_work_func(struct work_struct *work)
 	unsigned char i;
 	unsigned char first_value = 0;
 	unsigned char sign_value = 0;
-
-	//Printhh("[%s] enter..\n", __FUNCTION__);
 
 	bma250_get_interruptstatus1(bma250->bma250_client, &status);
 	Printhh("[%s] status=%#x\n", __FUNCTION__, status);
@@ -4410,7 +4205,7 @@ static irqreturn_t bma250_irq_handler(int irq, void *handle)
     Printhh("[%s] iGpioData(gpio-%d)=%d..\n", __FUNCTION__, BMA_INT2_GPIO, iGpioData);
 #endif
 
-	schedule_work(&data->irq_work); //: ==bma250_irq_work_func()
+	schedule_work(&data->irq_work);
 
 	return IRQ_HANDLED;
 
@@ -4419,9 +4214,6 @@ static irqreturn_t bma250_irq_handler(int irq, void *handle)
 #endif /* defined(BMA250_ENABLE_INT1)||defined(BMA250_ENABLE_INT2) */
 
 
-//
-// , 20120728, [ ] Correct regulator.
-//
 #if 1
 static int s_iEnDisPower(bool bEn)
 {
@@ -4432,11 +4224,9 @@ static int s_iEnDisPower(bool bEn)
 
     Printhh("[%s] enter...\n", __FUNCTION__);
 
-    if(bEn == true)     //turn on power
+    if(bEn == true)
     {
-        //
-        //  L_9
-        //
+
 #if 1
         reg_l9 = regulator_get(NULL,"8038_l9");
         if (IS_ERR(reg_l9)) {
@@ -4461,9 +4251,6 @@ static int s_iEnDisPower(bool bEn)
             return -ENODEV;
         }
 #endif
-        //
-        //  L_11
-        //
         reg_l11 = regulator_get(NULL,"8038_l11");
         if (IS_ERR(reg_l11)) {
             PrintTip("[%s] could not get 8038_l11, rc = %ld\n", __FUNCTION__, PTR_ERR(reg_l11));
@@ -4489,9 +4276,7 @@ static int s_iEnDisPower(bool bEn)
     }
     else
     {
-        //
-        //  L_9
-        //
+
         reg_l9 = regulator_get(NULL,"8038_l9");
         if (IS_ERR(reg_l9)) {
             PrintTip("[%s] could not get 8038_l9, rc = %ld\n", __FUNCTION__, PTR_ERR(reg_l9));
@@ -4507,9 +4292,6 @@ static int s_iEnDisPower(bool bEn)
             return -ENODEV;
         }
 
-        //
-        //  L_11
-        //
         reg_l11 = regulator_get(NULL,"8038_l11");
         if (IS_ERR(reg_l11)) {
             PrintTip("[%s] could not get 8038_l11, rc = %ld\n", __FUNCTION__, PTR_ERR(reg_l11));
@@ -4531,7 +4313,6 @@ static int s_iEnDisPower(bool bEn)
 
 }
 #endif
-// 
 
 
 static int bma250_probe(struct i2c_client *client,
@@ -4551,26 +4332,17 @@ static int bma250_probe(struct i2c_client *client,
       bool bEn = true;
 #endif
 
-
-//
-// , 20120728, [ ] Correct regulator.
-//
-#if 1   // enable 8038 regulator
+#if 1
     s_iEnDisPower(bEn);
  #endif
 
 
-/*	omap_mux_init_gpio(145, OMAP_PIN_INPUT);
-	omap_mux_init_gpio(146, OMAP_PIN_INPUT);
-*/
 	PrintTip("[%s] enter..\n", __FUNCTION__);
 
-	//PrintTip("[%s] call i2c_check_functionality()..\n", __FUNCTION__);
-	if (!i2c_check_functionality(client->adapter, I2C_FUNC_I2C)) {  //I2c.h (kernel\include\linux)
+	if (!i2c_check_functionality(client->adapter, I2C_FUNC_I2C)) {
 		printk(KERN_INFO "i2c_check_functionality error\n");
 		goto exit;
 	}
-	//PrintTip("[%s] aft i2c_check_functionality()..\n", __FUNCTION__);
 
 	data = kzalloc(sizeof(struct bma250_data), GFP_KERNEL);
 	if (!data) {
@@ -4579,7 +4351,7 @@ static int bma250_probe(struct i2c_client *client,
 	}
 
 	/* read chip id */
-	tempvalue = i2c_smbus_read_byte_data(client, BMA250_CHIP_ID_REG);   //I2c-core.c (kernel\drivers\i2c)
+	tempvalue = i2c_smbus_read_byte_data(client, BMA250_CHIP_ID_REG);
 
 
 	if (tempvalue == BMA250_CHIP_ID) {
@@ -4602,7 +4374,7 @@ static int bma250_probe(struct i2c_client *client,
 	bma250_set_range(client, BMA250_RANGE_SET);
 
 
-#if 1   // add for GPIO setting
+#if 1
     if (gpio_tlmm_config(GPIO_CFG(BMA_INT1_GPIO, 0, GPIO_CFG_INPUT,GPIO_CFG_NO_PULL,GPIO_CFG_2MA),GPIO_CFG_ENABLE)) {
         printk(KERN_ERR "%s: Err: Config GPIO-%d \n",	__func__, BMA_INT1_GPIO);
     }
@@ -4645,8 +4417,6 @@ static int bma250_probe(struct i2c_client *client,
 	bma250_set_Int_Enable(client,10, 1);
 	bma250_set_Int_Enable(client,11, 1);
 #endif
-    //: New Data
-	//bma250_set_Int_Enable(client,4, 1);
 
 
 #ifdef BMA250_ENABLE_INT1
@@ -4657,10 +4427,9 @@ static int bma250_probe(struct i2c_client *client,
 	bma250_set_int1_pad_sel(client, PAD_SLOP);
 	bma250_set_int1_pad_sel(client, PAD_DOUBLE_TAP);
 	bma250_set_int1_pad_sel(client, PAD_SINGLE_TAP);
-	//bma250_set_int1_pad_sel(client, PAD_ORIENT);
 	bma250_set_int1_pad_sel(client, PAD_FLAT);
     #endif
-	bma250_set_int1_pad_sel(client, 7); // add, new data
+	bma250_set_int1_pad_sel(client, 7);
 #endif
 
 #ifdef BMA250_ENABLE_INT2
@@ -4678,15 +4447,13 @@ static int bma250_probe(struct i2c_client *client,
 	bma250_set_int2_pad_sel(client, PAD_ORIENT);
 #endif
 
-#if 0   // for tt
-      // 46 -> 334 (+288)
-      // 67 -> 355
+#if 0
+
 	PrintTip("[%s] BMA_INT1_GPIO(%d)->irq(%d)\n", __FUNCTION__, BMA_INT1_GPIO, MSM_GPIO_TO_INT(BMA_INT1_GPIO));
 	PrintTip("[%s] BMA_INT2_GPIO(%d)->irq(%d)\n", __FUNCTION__, BMA_INT2_GPIO, MSM_GPIO_TO_INT(BMA_INT2_GPIO));
 #endif
 
 #if defined(BMA250_ENABLE_INT1) || defined(BMA250_ENABLE_INT2)
-	//data->IRQ = client->irq;
 	#if 1
 	data->IRQ = MSM_GPIO_TO_INT(BMA_INT1_GPIO);
 	err = request_irq(data->IRQ, bma250_irq_handler, IRQF_TRIGGER_RISING,
@@ -4695,7 +4462,7 @@ static int bma250_probe(struct i2c_client *client,
 		printk(KERN_ERR "could not request irq\n");
 	#endif
 
-    #if 1   // add
+    #if 1
     	err = request_irq(MSM_GPIO_TO_INT(BMA_INT2_GPIO), bma250_irq_handler, IRQF_TRIGGER_RISING,
 			"bma250", data);
 	if (err)
@@ -4706,7 +4473,7 @@ static int bma250_probe(struct i2c_client *client,
 	INIT_WORK(&data->irq_work, bma250_irq_work_func);
 #endif
 
-	INIT_DELAYED_WORK(&data->work, bma250_work_func);	//: TBD!!
+	INIT_DELAYED_WORK(&data->work, bma250_work_func);
 	atomic_set(&data->delay, BMA250_MAX_DELAY);
 	atomic_set(&data->enable, 0);
 

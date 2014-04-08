@@ -45,8 +45,7 @@ int32_t msm_camera_eeprom_read_tbl(struct msm_eeprom_ctrl_t *ectrl,
 		return rc;
 
 	for (i = 0; i < tbl_size; i++) {
-        if(read_tbl[i].reg_addr < 0xff)//JackBB 2012/10/17
-        {
+        if(read_tbl[i].reg_addr < 0xff) {
 		rc = msm_camera_eeprom_read
 			(ectrl, read_tbl[i].reg_addr,
 			read_tbl[i].dest_ptr, read_tbl[i].num_byte,
